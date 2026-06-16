@@ -1,0 +1,20 @@
+{
+  "query": "Carr Synopsis",
+  "reason": "the real catalyst book that triggered his work",
+  "motion": "slow_zoom",
+  "start_seconds": 3.0,
+  "duration_seconds": 4.0,
+  "sfx": "camera_click",
+  "provider": "wikimedia_commons",
+  "available": true,
+  "asset_path": "assets\\archival\\carr_synopsis\\file_synopsis_of_pure_mathematics_png.png",
+  "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Synopsis_of_Pure_Mathematics.png",
+  "license": "Public domain",
+  "reason_unavailable": null,
+  "source_page": "https://commons.wikimedia.org/wiki/File%3ASynopsis_of_Pure_Mathematics.png",
+  "artist": "G. S. Carr",
+  "credit": "https://archive.org/details/synopsisofelemen00carrrich/page/n5/mode/2up",
+  "run_id": "ramanujan_12min_v3",
+  "beat_index": 8,
+  "resolved_at": "2026-06-12T11:40:13.219086+00:00"
+}

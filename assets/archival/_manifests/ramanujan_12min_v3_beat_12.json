@@ -1,0 +1,20 @@
+{
+  "query": "Madras Port Trust",
+  "reason": "the real institution where he worked",
+  "motion": "slow_zoom",
+  "start_seconds": 2.0,
+  "duration_seconds": 3.5,
+  "sfx": "camera_click",
+  "provider": "wikimedia_commons",
+  "available": true,
+  "asset_path": "assets\\archival\\madras_port_trust\\file_chennai_port_aerial_view_jpg.jpg",
+  "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/08/Chennai_Port_aerial_view.jpg",
+  "license": "CC BY-SA 4.0",
+  "reason_unavailable": null,
+  "source_page": "https://commons.wikimedia.org/wiki/File%3AChennai_Port_aerial_view.jpg",
+  "artist": "Saiphani02",
+  "credit": "Own work",
+  "run_id": "ramanujan_12min_v3",
+  "beat_index": 12,
+  "resolved_at": "2026-06-12T11:40:15.411073+00:00"
+}

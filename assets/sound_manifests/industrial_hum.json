@@ -1,0 +1,15 @@
+{
+  "available": true,
+  "query": "industrial hum",
+  "asset_path": "assets\\ambience\\industrial_hum.mp3",
+  "cache_key": "industrial_hum",
+  "cache_policy": "saved_under_assets_and_reused_before_future_downloads",
+  "provider": "openverse",
+  "license": "cc0",
+  "title": "industrial hums factory water treatment plant drone highcut.flac",
+  "creator": "kyles",
+  "source_url": "https://cdn.freesound.org/previews/453/453460_612689-hq.mp3",
+  "source_page": "https://freesound.org/people/kyles/sounds/453460",
+  "downloaded_at": "2026-06-08T17:15:07.756007+00:00",
+  "resolved_at": "2026-06-08T17:15:07.757005+00:00"
+}

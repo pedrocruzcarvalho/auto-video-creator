@@ -1,0 +1,17 @@
+{
+  "query": "early 20th century P and O steamship Suez Canal public domain photograph",
+  "reason": "the real mail route between India and Britain",
+  "motion": "handheld_drift",
+  "start_seconds": 4.0,
+  "duration_seconds": 3.5,
+  "sfx": "none",
+  "provider": "wikimedia_commons",
+  "available": false,
+  "asset_path": null,
+  "source_url": null,
+  "license": null,
+  "reason_unavailable": "download_failed:HTTPError:HTTP Error 429: Too many requests (f061ab2)",
+  "run_id": "ramanujan_12min_v3",
+  "beat_index": 15,
+  "resolved_at": "2026-06-12T11:40:16.644956+00:00"
+}

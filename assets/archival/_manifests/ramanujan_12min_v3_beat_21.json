@@ -1,0 +1,17 @@
+{
+  "query": "Trinity College Cambridge Great Court 1914 photograph Wikimedia",
+  "reason": "the real campus he arrived at",
+  "motion": "parallax",
+  "start_seconds": 4.0,
+  "duration_seconds": 3.5,
+  "sfx": "none",
+  "provider": "wikimedia_commons",
+  "available": false,
+  "asset_path": null,
+  "source_url": null,
+  "license": null,
+  "reason_unavailable": "download_failed:HTTPError:HTTP Error 429: Too Many Requests",
+  "run_id": "ramanujan_12min_v3",
+  "beat_index": 21,
+  "resolved_at": "2026-06-12T11:40:18.818481+00:00"
+}

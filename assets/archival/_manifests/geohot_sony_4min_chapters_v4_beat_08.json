@@ -1,0 +1,15 @@
+{
+  "query": "geohot.com 2011 PS3 hack screenshot Wikimedia archive",
+  "reason": "credibility insert for the published key moment",
+  "motion": "glitch_reveal",
+  "sfx": "none",
+  "provider": "wikimedia_commons",
+  "available": false,
+  "asset_path": null,
+  "source_url": null,
+  "license": null,
+  "reason_unavailable": "no_safe_result",
+  "run_id": "geohot_sony_4min_chapters_v4",
+  "beat_index": 8,
+  "resolved_at": "2026-06-10T23:11:02.297378+00:00"
+}

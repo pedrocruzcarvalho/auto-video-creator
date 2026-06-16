@@ -1,0 +1,20 @@
+{
+  "query": "Erode India",
+  "reason": "ground viewer in the real birthplace",
+  "motion": "parallax",
+  "start_seconds": 6.0,
+  "duration_seconds": 3.5,
+  "sfx": "camera_click",
+  "provider": "wikimedia_commons",
+  "available": true,
+  "asset_path": "assets\\archival\\erode_india\\file_erode_rugs_jpg.jpg",
+  "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Erode_rugs.jpg",
+  "license": "CC BY 2.0",
+  "reason_unavailable": null,
+  "source_page": "https://commons.wikimedia.org/wiki/File%3AErode_rugs.jpg",
+  "artist": "Frank Hebbert",
+  "credit": "originally posted to Flickr as franch express courier",
+  "run_id": "ramanujan_12min_v3",
+  "beat_index": 6,
+  "resolved_at": "2026-06-12T11:40:12.508655+00:00"
+}

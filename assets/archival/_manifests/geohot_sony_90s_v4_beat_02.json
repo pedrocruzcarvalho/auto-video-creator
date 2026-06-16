@@ -1,0 +1,15 @@
+{
+  "query": "George Hotz geohot young hacker public photo Wikimedia",
+  "reason": "Confirm real person behind the story",
+  "motion": "slow_zoom",
+  "sfx": "camera_click",
+  "provider": "wikimedia_commons",
+  "available": false,
+  "asset_path": null,
+  "source_url": null,
+  "license": null,
+  "reason_unavailable": "no_safe_result",
+  "run_id": "geohot_sony_90s_v4",
+  "beat_index": 2,
+  "resolved_at": "2026-06-08T17:10:15.763109+00:00"
+}

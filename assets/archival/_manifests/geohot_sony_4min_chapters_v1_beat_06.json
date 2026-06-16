@@ -1,0 +1,15 @@
+{
+  "query": "geohot blog January 2010 PS3 hack announcement screenshot archive",
+  "reason": "Real artifact of the announcement",
+  "motion": "slow_zoom",
+  "sfx": "glitch",
+  "provider": "wikimedia_commons",
+  "available": false,
+  "asset_path": null,
+  "source_url": null,
+  "license": null,
+  "reason_unavailable": "no_safe_result",
+  "run_id": "geohot_sony_4min_chapters_v1",
+  "beat_index": 6,
+  "resolved_at": "2026-06-10T18:35:14.936738+00:00"
+}

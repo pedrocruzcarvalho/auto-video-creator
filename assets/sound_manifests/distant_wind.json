@@ -1,0 +1,15 @@
+{
+  "available": true,
+  "query": "distant wind",
+  "asset_path": "assets\\ambience\\distant_wind.mp3",
+  "cache_key": "distant_wind",
+  "cache_policy": "saved_under_assets_and_reused_before_future_downloads",
+  "provider": "openverse",
+  "license": "cc0",
+  "title": "loop smooth muffled rushing air tone skyline traffic distant wind trees forest.flac",
+  "creator": "kyles",
+  "source_url": "https://cdn.freesound.org/previews/454/454072_612689-hq.mp3",
+  "source_page": "https://freesound.org/people/kyles/sounds/454072",
+  "downloaded_at": "2026-06-08T18:57:57.363680+00:00",
+  "resolved_at": "2026-06-08T18:57:57.364679+00:00"
+}

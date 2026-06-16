@@ -1,0 +1,20 @@
+{
+  "query": "John Edensor Littlewood mathematician",
+  "reason": "the real collaborator Hardy called in",
+  "motion": "slow_zoom",
+  "start_seconds": 11.0,
+  "duration_seconds": 3.5,
+  "sfx": "none",
+  "provider": "wikimedia_commons",
+  "available": true,
+  "asset_path": "assets\\archival\\john_edensor_littlewood_mathematician_portrait_wikimedia_commons\\file_john_edensor_littlewood_jpg.jpg",
+  "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/John_Edensor_Littlewood.jpg",
+  "license": "CC BY-SA 3.0",
+  "reason_unavailable": null,
+  "source_page": "https://commons.wikimedia.org/wiki/File%3AJohn_Edensor_Littlewood.jpg",
+  "artist": "no conegut",
+  "credit": "Alchetron: https://alchetron.com/John-Edensor-Littlewood",
+  "run_id": "ramanujan_12min_v3",
+  "beat_index": 16,
+  "resolved_at": "2026-06-12T11:40:17.808555+00:00"
+}

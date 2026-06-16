@@ -1,0 +1,15 @@
+{
+  "query": "PlayStation Network outage 2011 official press image Wikimedia",
+  "reason": "Credibility hit anchoring the real-world breach.",
+  "motion": "glitch_reveal",
+  "sfx": "glitch",
+  "provider": "wikimedia_commons",
+  "available": false,
+  "asset_path": null,
+  "source_url": null,
+  "license": null,
+  "reason_unavailable": "no_safe_result",
+  "run_id": "geohot_sony_90s_v8",
+  "beat_index": 7,
+  "resolved_at": "2026-06-08T20:46:03.327499+00:00"
+}

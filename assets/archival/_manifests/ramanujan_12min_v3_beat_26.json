@@ -1,0 +1,17 @@
+{
+  "query": "early 20th century English tuberculosis sanatorium ward photograph Wikimedia",
+  "reason": "the real medical environment of his illness",
+  "motion": "parallax",
+  "start_seconds": 5.0,
+  "duration_seconds": 3.5,
+  "sfx": "none",
+  "provider": "wikimedia_commons",
+  "available": false,
+  "asset_path": null,
+  "source_url": null,
+  "license": null,
+  "reason_unavailable": "download_failed:HTTPError:HTTP Error 429: Too Many Requests",
+  "run_id": "ramanujan_12min_v3",
+  "beat_index": 26,
+  "resolved_at": "2026-06-12T11:40:19.020271+00:00"
+}
