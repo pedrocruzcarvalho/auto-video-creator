@@ -1,4 +1,4 @@
-# Exit Scenario Production SOP
+﻿# Extreme Survival Production SOP
 
 ## Goal
 
@@ -191,3 +191,4 @@ After 10-15 Shorts:
 - add quick transitions;
 - add a stronger ending;
 - do not upload raw back-to-back Shorts without packaging.
+

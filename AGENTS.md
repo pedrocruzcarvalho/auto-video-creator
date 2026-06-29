@@ -1,13 +1,13 @@
-# Codex Project Handoff
+﻿# Codex Project Handoff
 
 ## Project
 
-This repo is for **Exit Scenario**, a YouTube Shorts automation tool for fictional survival / almost-impossible situation videos.
+This repo is for **Extreme Survival**, a YouTube Shorts automation tool for fictional survival / almost-impossible situation videos.
 
 Channel direction:
 
-- Channel name: `Exit Scenario`
-- Handle: `@ExitScenarioTV`
+- Channel name: `Extreme Survival`
+- Handle: `@ExtremeSurvivalTV`
 - Tagline: `One situation. One rule. One way out.`
 - Format: vertical YouTube Shorts, usually 25-35 seconds for the current pipeline.
 - Niche: tricky survival simulations, impossible accidents, countdown tests, one-rule survival situations.
@@ -49,7 +49,7 @@ Main app:
 
 - File: `streamlit_app.py`
 - Run with: `streamlit run streamlit_app.py`
-- App name: `Seedance Shorts Studio`
+- App name: `Seedance Survival Studio`
 - Default scenario: `Sinking car water tank`
 
 CLI:
@@ -169,3 +169,4 @@ python -c "from pipeline.seedance_native import estimate_seedance_cost; print(es
 ```
 
 Do not use smoke checks that generate paid videos unless explicitly approved.
+

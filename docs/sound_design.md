@@ -1,4 +1,4 @@
-# Exit Scenario Sound Design
+﻿# Extreme Survival Sound Design
 
 ## Sound Goal
 
@@ -122,3 +122,4 @@ Before upload:
 - Twist has silence or a riser before it.
 - Final impact is satisfying.
 - No copyrighted audio dependency.
+

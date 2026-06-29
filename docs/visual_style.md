@@ -1,4 +1,4 @@
-# Exit Scenario Visual Style
+﻿# Extreme Survival Visual Style
 
 ## Format
 
@@ -245,3 +245,4 @@ Recommended cover text:
 - WRONG DOOR
 - ROOM 12
 - PICK ONE
+

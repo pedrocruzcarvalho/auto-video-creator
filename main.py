@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import re
@@ -47,7 +47,7 @@ def run(
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate a Seedance-native Exit Scenario Short.")
+    parser = argparse.ArgumentParser(description="Generate a Seedance-native Extreme Survival Short.")
     parser.add_argument("topic", nargs="?", default="Sinking car water tank", help="Used for the output folder name.")
     parser.add_argument("--run-id", help="Optional fixed output folder under output/<run_id>.")
     parser.add_argument("--resolution", choices=["480p", "720p", "1080p"], default="720p")
@@ -75,3 +75,4 @@ if __name__ == "__main__":
         no_voice_reference=args.no_voice_reference,
         fresh=args.fresh,
     )
+

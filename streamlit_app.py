@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
 import re
@@ -33,12 +33,12 @@ STATUS_LABELS = {
 
 def main() -> None:
     load_environment()
-    st.set_page_config(page_title="Exit Scenario Studio", page_icon="!", layout="wide")
+    st.set_page_config(page_title="Extreme Survival Studio", page_icon="!", layout="wide")
     _inject_css()
     _init_state()
 
-    st.markdown('<div class="eyebrow">Exit Scenario</div>', unsafe_allow_html=True)
-    st.title("Seedance Shorts Studio")
+    st.markdown('<div class="eyebrow">Extreme Survival</div>', unsafe_allow_html=True)
+    st.title("Seedance Survival Studio")
     st.caption("Two 15-second Seedance clips, last-frame continuation, native voice, synced captions.")
     _render_key_status()
 
@@ -301,3 +301,4 @@ def _inject_css() -> None:
 
 if __name__ == "__main__":
     main()
+

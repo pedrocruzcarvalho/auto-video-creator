@@ -1,4 +1,4 @@
-# Exit Scenario Shorts Format
+﻿# Extreme Survival Shorts Format
 
 ## Default Runtime
 
@@ -172,7 +172,7 @@ Avoid:
 
 ## Video-Only Rule
 
-Paid Exit Scenario renders must not use still image plates as final footage.
+Paid Extreme Survival renders must not use still image plates as final footage.
 
 - Keyframes are allowed only as image-to-video inputs.
 - Every planned beat must generate a motion clip.
@@ -188,3 +188,4 @@ Before producing a Short, confirm:
 - The threat is visible.
 - There is a strong sound hit.
 - The viewer can ask, "What would I do?"
+

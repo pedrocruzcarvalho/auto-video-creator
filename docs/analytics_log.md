@@ -1,4 +1,4 @@
-# Exit Scenario Analytics Log
+﻿# Extreme Survival Analytics Log
 
 Use one row per upload. Fill this after 24 hours, 72 hours, and 7 days.
 
@@ -67,3 +67,4 @@ Review every 10 Shorts.
 - If comments say "AI slop": improve physical specificity, motion, sound, and overlay clarity.
 - If a bucket wins twice: produce 5 more variations immediately.
 - If a format loses 5 times: pause it for two weeks.
+

@@ -1,4 +1,4 @@
-seedance:
+﻿seedance:
   model: bytedance/seedance-2.0
   resolution: 720p
   aspect_ratio: "9:16"
@@ -23,6 +23,7 @@ captions:
   outline_color: "&H00111111"
 
 channel:
-  name: Exit Scenario
-  handle: "@ExitScenarioTV"
+  name: Extreme Survival
+  handle: "@ExtremeSurvivalTV"
   tagline: "One situation. One rule. One way out."
+

@@ -1,6 +1,6 @@
-# Exit Scenario Shorts Studio
+﻿# Extreme Survival Shorts Studio
 
-Local production tool for **Exit Scenario**:
+Local production tool for **Extreme Survival**:
 
 > One situation. One rule. One way out.
 
@@ -95,3 +95,4 @@ The creative direction lives in `docs/`:
 - `docs/prompt_templates.md`
 - `docs/production_sop.md`
 - `docs/analytics_log.md`
+

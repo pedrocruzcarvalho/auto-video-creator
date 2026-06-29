@@ -1,9 +1,9 @@
-# Exit Scenario Channel Strategy
+﻿# Extreme Survival Channel Strategy
 
 ## Channel Identity
 
-- Channel name: Exit Scenario
-- Handle: @ExitScenarioTV
+- Channel name: Extreme Survival
+- Handle: @ExtremeSurvivalTV
 - Tagline: One situation. One rule. One way out.
 - Format: fictional almost-impossible survival situation Shorts, later repackaged into compilations.
 - Core promise: every episode places the viewer inside one tricky physical survival situation with one clear rule and one satisfying survival move.
@@ -152,3 +152,4 @@ Weak idea:
 - Always one obvious timer, threat, door, button, gauge, or boundary.
 - Always a sound hit on the first visual change.
 - Always a payoff, twist, or choice at the end.
+

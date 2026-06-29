@@ -1,11 +1,11 @@
-# Exit Scenario Prompt Templates
+﻿# Extreme Survival Prompt Templates
 
 ## Script Prompt
 
 Use this to generate one Short script.
 
 ```text
-Write a 25-58 second YouTube Shorts script for Exit Scenario. Default target: 50 seconds.
+Write a 25-58 second YouTube Shorts script for Extreme Survival. Default target: 50 seconds.
 
 Channel concept:
 Fictional almost-impossible survival situations told in second person. Fast, simple, visual, and sound-driven. Semi-realistic viral 3D simulation explainer style, not slow context-heavy storytelling and not escape-room lore.
@@ -39,7 +39,7 @@ Return:
 ## Beat Plan Prompt
 
 ```text
-Turn this Exit Scenario script into a 9:16 production beat plan for a tricky survival situation.
+Turn this Extreme Survival script into a 9:16 production beat plan for a tricky survival situation.
 
 Script:
 [PASTE SCRIPT]
@@ -146,7 +146,7 @@ Polished semi-realistic social-video CGI, bold, readable, viral Shorts cover, no
 ## Title Generation Prompt
 
 ```text
-Generate 20 YouTube Shorts titles for Exit Scenario.
+Generate 20 YouTube Shorts titles for Extreme Survival.
 
 Rules:
 - Second-person or object-first.
@@ -190,3 +190,4 @@ Grab the edge, spread your arms, stay flat, and roll away instead of standing.
 
 Twist:
 The camera drops below the ice and shows something moving under the hole.
+
