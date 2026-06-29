@@ -30,6 +30,122 @@ STATUS_LABELS = {
     "failed": "Failed",
 }
 
+PRESETS = {
+    "Sinking car water tank": {
+        "run_id": "seedance_sinking_car_v1",
+        "script_part_1": DEFAULT_SCRIPT_PART_1,
+        "script_part_2": DEFAULT_SCRIPT_PART_2,
+        "clip_1_visual": DEFAULT_CLIP_1_VISUAL,
+        "clip_2_visual": DEFAULT_CLIP_2_VISUAL,
+    },
+    "Conveyor belt pulls you toward rollers": {
+        "run_id": "conveyor_rollers_v1",
+        "script_part_1": (
+            "You fall onto a moving conveyor belt, and it is dragging you toward crushing rollers. "
+            "Do not grab the roller. Look beside you. A loose metal tray is the fastest way out. "
+            "Turn your body sideways and reach for it."
+        ),
+        "script_part_2": (
+            "Slide the tray across the belt, flat against the moving rubber. "
+            "When it wedges under the roller guard, the belt jolts for one second. "
+            "Use that pause to roll sideways off the belt and hit the red stop paddle."
+        ),
+        "clip_1_visual": (
+            "Vertical 9:16 glossy viral 3D survival simulation, clearly fictional CGI. "
+            "Same athletic adult male training avatar, short brown hair, gray work shirt, realistic hands, bright clean factory training room, "
+            "wide black conveyor belt, silver crushing rollers, loose metal tray nearby, red stop paddle on side rail. "
+            "Dynamic camera, fast push-ins, snap zooms, macro object close-ups. Camera always points to the exact narrated object. "
+            "Not live-action, not real accident footage, not children's cartoon, not Pixar. No on-screen text, no captions, no letters, no numbers, "
+            "no logos, no signs, no UI, no watermark.\n\n"
+            "Create part 1 of a continuous fictional conveyor belt survival simulation. Native serious male narrator plus conveyor motor rumble, roller hum, "
+            "metal clanks, breath hits, and bass impacts.\n\n"
+            "0-2s: high angle shot as the avatar lands on a fast moving black conveyor belt, sliding feet-first toward two silver rollers.\n"
+            "2-5s: snap zoom to the rollers spinning with a narrow gap, then whip pan back to his hands gripping the belt surface.\n"
+            "5-8s: close-up of his hand almost reaching toward the roller, then pulling back before touching it.\n"
+            "8-11s: camera push-in to a loose rectangular metal tray rattling beside the belt on the floor.\n"
+            "11-15s: avatar twists sideways across the belt and stretches one arm toward the tray, end on his fingers grabbing the tray edge."
+        ),
+        "clip_2_visual": (
+            "Vertical 9:16 glossy viral 3D survival simulation, clearly fictional CGI. Continue exactly from the input first frame. "
+            "Same bright factory training room, same black conveyor belt, same silver rollers, same gray-shirt avatar, same metal tray in his hand. "
+            "Dynamic camera, fast push-ins, snap zooms, macro object close-ups. Camera always points to the exact narrated object. "
+            "No on-screen text, no captions, no letters, no numbers, no logos, no signs, no UI, no watermark.\n\n"
+            "Continue the conveyor belt survival simulation with native serious male narrator plus belt rumble, tray scrape, roller jolt, alarm chirp, and stop thump.\n\n"
+            "0-3s: begin on the same fingers gripping the tray; he pulls it onto the moving belt while sliding closer to the rollers.\n"
+            "3-6s: macro shot of the tray laid flat across the moving rubber, vibrating as the belt drags it forward.\n"
+            "6-10s: snap zoom as the tray wedges under the roller guard; the belt jolts and slows for one second.\n"
+            "10-13s: avatar rolls sideways off the belt onto the safe floor, camera follows the fast roll.\n"
+            "13-15s: close-up of his palm slapping the red stop paddle; rollers stop and the tray drops with a metal clank."
+        ),
+    },
+    "Walk-in freezer locks behind you": {
+        "run_id": "freezer_lockin_v1",
+        "script_part_1": (
+            "You step into a walk-in freezer and the door locks behind you. "
+            "Do not waste your breath yelling. The warmest tool is already in the room. "
+            "Grab a metal shelf and move toward the door gasket."
+        ),
+        "script_part_2": (
+            "Slide the shelf edge between the rubber seal and the frame. "
+            "Warm air starts leaking through the gap, and the frost cracks around the latch. "
+            "Now lever the shelf sideways and shoulder the door open."
+        ),
+        "clip_1_visual": (
+            "Vertical 9:16 glossy viral 3D survival simulation, clearly fictional CGI. Same adult male training avatar, brown hair, gray hoodie, "
+            "bright walk-in freezer room, frosted metal shelves, white door gasket, icy latch, visible cold vapor, clean readable action. "
+            "Dynamic camera, fast push-ins, snap zooms, macro object close-ups. Camera always points to the exact narrated object. "
+            "No on-screen text, no captions, no letters, no numbers, no logos, no signs, no UI, no watermark.\n\n"
+            "0-2s: door slams shut behind the avatar inside a bright freezer, cold vapor rushes around him.\n"
+            "2-5s: snap zoom to his hand pulling the locked handle, frost shaking loose.\n"
+            "5-8s: close-up of him breathing into cold air, then stopping and looking around.\n"
+            "8-11s: camera push-in to a loose metal shelf panel on the rack.\n"
+            "11-15s: he grabs the shelf with both hands and carries it toward the door gasket, end on shelf edge near the rubber seal."
+        ),
+        "clip_2_visual": (
+            "Vertical 9:16 glossy viral 3D survival simulation, clearly fictional CGI. Continue exactly from the input first frame. "
+            "Same freezer room, same gray-hoodie avatar, same loose metal shelf edge at the white rubber door gasket. "
+            "Dynamic camera, fast push-ins, snap zooms, macro object close-ups. No on-screen text, no captions, no letters, no numbers, no logos, no signs, no UI.\n\n"
+            "0-3s: shelf edge slides into the gap between rubber gasket and metal frame.\n"
+            "3-6s: macro shot of frost cracking as a thin stream of warmer air leaks through.\n"
+            "6-10s: he levers the shelf sideways, latch area flexes, ice flakes fall.\n"
+            "10-13s: shoulder push on the door; it pops open with cold vapor blasting out.\n"
+            "13-15s: he steps into bright hallway light, shelf still in hand, door swinging open behind him."
+        ),
+    },
+    "Escalator step collapses under you": {
+        "run_id": "escalator_step_collapse_v1",
+        "script_part_1": (
+            "You are riding an escalator when the step under your foot drops open. "
+            "Do not step deeper into the gap. Throw your weight onto both handrails and lift your knees."
+        ),
+        "script_part_2": (
+            "The moving stairs keep folding underneath you. Keep your shoes away from the teeth at the top. "
+            "Swing one leg onto the side panel, then pull your body sideways onto the landing."
+        ),
+        "clip_1_visual": (
+            "Vertical 9:16 glossy viral 3D survival simulation, clearly fictional CGI. Same adult male training avatar, brown hair, navy jacket, "
+            "clean shopping mall escalator training scene, moving metal steps, black rubber handrails, bright readable lighting. "
+            "Dynamic camera, fast push-ins, snap zooms, macro object close-ups. Camera always points to the exact narrated object. "
+            "No on-screen text, no captions, no letters, no numbers, no logos, no signs, no UI, no watermark.\n\n"
+            "0-2s: escalator moving upward, one metal step suddenly drops open beneath his shoe.\n"
+            "2-5s: snap zoom to the dark gap and folding metal step edges moving below.\n"
+            "5-8s: close-up of his shoe hovering above the gap, then pulling back before it drops deeper.\n"
+            "8-11s: camera pushes to both hands grabbing the black rubber handrails hard.\n"
+            "11-15s: he lifts both knees while suspended between the rails, end on feet clear above the broken step gap."
+        ),
+        "clip_2_visual": (
+            "Vertical 9:16 glossy viral 3D survival simulation, clearly fictional CGI. Continue exactly from the input first frame. "
+            "Same mall escalator, same navy-jacket avatar, same hands gripping both handrails, same broken moving step gap. "
+            "Dynamic camera, fast push-ins, snap zooms, macro object close-ups. No on-screen text, no captions, no letters, no numbers, no logos, no signs, no UI.\n\n"
+            "0-3s: broken steps fold under him while he keeps both knees high.\n"
+            "3-6s: macro shot of shoe staying away from the metal teeth at the top landing.\n"
+            "6-10s: he swings one leg sideways onto the smooth side panel, camera follows the leg.\n"
+            "10-13s: he pulls his torso sideways off the moving steps onto the landing floor.\n"
+            "13-15s: close-up of him safely on the landing as the broken step passes below."
+        ),
+    },
+}
+
 
 def main() -> None:
     load_environment()
@@ -73,16 +189,19 @@ def _render_controls() -> SeedanceOptions:
     st.subheader("1. Short Setup")
     preset = st.selectbox(
         "Scenario",
-        [
-            "Sinking car water tank",
-            "Custom",
-        ],
+        [*PRESETS.keys(), "Custom"],
         index=0,
     )
 
+    if st.session_state.get("selected_preset") != preset:
+        st.session_state.selected_preset = preset
+        if preset in PRESETS:
+            st.session_state.run_id = PRESETS[preset]["run_id"]
+
+    st.session_state.setdefault("run_id", _preset_value(preset, "run_id", "seedance_short"))
     topic = st.text_input(
         "Folder name / run id",
-        value=st.session_state.get("run_id") or "seedance_sinking_car_v1",
+        key="run_id",
         help="One output folder is created under output/<run_id>.",
     )
 
@@ -110,11 +229,11 @@ def _render_controls() -> SeedanceOptions:
     m2.metric("Clip 2", f"${estimate['clip_2_usd']:.2f}")
     m3.metric("Total", f"${estimate['total_usd']:.2f}")
 
-    if preset == "Sinking car water tank":
-        script_part_1 = DEFAULT_SCRIPT_PART_1
-        script_part_2 = DEFAULT_SCRIPT_PART_2
-        clip_1_visual = DEFAULT_CLIP_1_VISUAL
-        clip_2_visual = DEFAULT_CLIP_2_VISUAL
+    if preset in PRESETS:
+        script_part_1 = PRESETS[preset]["script_part_1"]
+        script_part_2 = PRESETS[preset]["script_part_2"]
+        clip_1_visual = PRESETS[preset]["clip_1_visual"]
+        clip_2_visual = PRESETS[preset]["clip_2_visual"]
     else:
         script_part_1 = st.session_state.get("script_part_1", DEFAULT_SCRIPT_PART_1)
         script_part_2 = st.session_state.get("script_part_2", DEFAULT_SCRIPT_PART_2)
@@ -123,10 +242,11 @@ def _render_controls() -> SeedanceOptions:
 
     with st.expander("Advanced script and visual prompts", expanded=(preset == "Custom")):
         st.caption("Keep each part around 15 seconds. Seedance speaks each part separately.")
-        script_part_1 = st.text_area("Narration clip 1", value=script_part_1, height=110)
-        script_part_2 = st.text_area("Narration clip 2", value=script_part_2, height=110)
-        clip_1_visual = st.text_area("Visual prompt clip 1", value=clip_1_visual, height=240)
-        clip_2_visual = st.text_area("Visual prompt clip 2", value=clip_2_visual, height=240)
+        disabled = preset in PRESETS
+        script_part_1 = st.text_area("Narration clip 1", value=script_part_1, height=110, disabled=disabled)
+        script_part_2 = st.text_area("Narration clip 2", value=script_part_2, height=110, disabled=disabled)
+        clip_1_visual = st.text_area("Visual prompt clip 1", value=clip_1_visual, height=240, disabled=disabled)
+        clip_2_visual = st.text_area("Visual prompt clip 2", value=clip_2_visual, height=240, disabled=disabled)
 
     st.session_state.run_id = topic
     st.session_state.seed = int(seed)
@@ -256,6 +376,12 @@ def _init_state() -> None:
 def _safe_run_id(value: str) -> str:
     words = re.findall(r"[A-Za-z0-9]+", value.lower())
     return ("_".join(words) or "seedance_short")[:80]
+
+
+def _preset_value(preset: str, key: str, fallback: str) -> str:
+    if preset in PRESETS:
+        return str(PRESETS[preset][key])
+    return fallback
 
 
 def _inject_css() -> None:

@@ -50,7 +50,8 @@ Main app:
 - File: `streamlit_app.py`
 - Run with: `streamlit run streamlit_app.py`
 - App name: `Seedance Survival Studio`
-- Default scenario: `Sinking car water tank`
+- Built-in presets include `Sinking car water tank`, `Conveyor belt pulls you toward rollers`, `Walk-in freezer locks behind you`, and `Escalator step collapses under you`.
+- Use `Custom` only when manually testing a new script and visual prompt.
 
 CLI:
 
@@ -98,7 +99,7 @@ Default recommendation:
 
 For the next real test:
 
-- Scenario: `Sinking car water tank` or `Custom`
+- Scenario: preferably `Conveyor belt pulls you toward rollers` for a non-water smart-survival test, or another built-in preset.
 - Quality: `720p`
 - Add synced captions: `on`
 - Keep voice consistent between clips: `on`
@@ -169,4 +170,3 @@ python -c "from pipeline.seedance_native import estimate_seedance_cost; print(es
 ```
 
 Do not use smoke checks that generate paid videos unless explicitly approved.
-

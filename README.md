@@ -43,11 +43,13 @@ streamlit run streamlit_app.py
 
 Recommended first run:
 
-- Scenario: `Sinking car water tank`
+- Scenario: `Conveyor belt pulls you toward rollers` for a non-water smart-survival test, or `Sinking car water tank` for the known baseline
 - Quality: `720p`
 - Add synced captions: on
 - Keep voice consistent between clips: on
 - Reuse existing clips: on
+
+The app includes built-in presets, so you do not need to type scripts or prompts for normal runs. Use `Custom` only when testing a new manually written idea.
 
 At 720p the planning estimate is about **$6 per 30-second Short**:
 
