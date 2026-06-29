@@ -47,6 +47,7 @@ Main pipeline:
 - Bridge: extract the final frame from clip 1.
 - Clip 2: starts from clip 1 final frame. Do not send audio/video references together with the first-frame image because Seedance rejects that input combination.
 - Final: stitch both clips, optionally transcribe audio with OpenAI Whisper, burn ASS captions with FFmpeg.
+- If a fresh run would overwrite an existing `final.mp4`, the pipeline archives the old final as `SAVED_<run_id>_<timestamp>.mp4` in the same run folder first.
 
 Main app:
 

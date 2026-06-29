@@ -70,7 +70,7 @@ At 720p the planning estimate is about **$6 per 30-second Short**:
 - clip 1: about `$2.70`
 - continuation clip 2: about `$3.30`
 
-Caption rebuilds do not require regenerating Seedance clips when reuse is on. Rerunning a completed run id reuses the existing `final.mp4` and does not call Seedance again unless `--fresh` is used.
+Caption rebuilds do not require regenerating Seedance clips when reuse is on. Rerunning a completed run id reuses the existing `final.mp4` and does not call Seedance again unless `--fresh` is used. If `--fresh` is used and `final.mp4` already exists, the old final is first copied to `SAVED_<run_id>_<timestamp>.mp4` inside the same run folder.
 
 ## Run CLI
 

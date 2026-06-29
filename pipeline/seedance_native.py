@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import time
 import urllib.request
 from dataclasses import dataclass
@@ -105,6 +106,7 @@ def run_seedance_native_pipeline(options: SeedanceOptions, progress_callback: Pr
         report = json.loads(report_path.read_text(encoding="utf-8"))
         report["reused_existing_final"] = True
         return report
+    archived_final = _archive_existing_final(base, options.run_id) if not options.resume else None
 
     clips_dir = base / "clips"
     review_dir = base / "review_frames"
@@ -188,6 +190,7 @@ def run_seedance_native_pipeline(options: SeedanceOptions, progress_callback: Pr
         "review_frames": [str(path) for path in frames],
         "estimate": estimate_seedance_cost(options.resolution),
         "reused_existing_final": False,
+        "archived_previous_final": str(archived_final) if archived_final else None,
         "script": f"{options.script_part_1} {options.script_part_2}",
     }
     (base / "run_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -484,6 +487,16 @@ def _file_valid(path: Path) -> bool:
     return path.exists() and path.stat().st_size > 1024
 
 
+def _archive_existing_final(base: Path, run_id: str) -> Path | None:
+    current = base / "final.mp4"
+    if not _file_valid(current):
+        return None
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archived = base / f"SAVED_{run_id}_{stamp}.mp4"
+    shutil.copy2(current, archived)
+    return archived
+
+
 def _markdown_report(report: dict[str, Any]) -> str:
     lines = [
         f"# {report['run_id']}",
@@ -497,6 +510,7 @@ def _markdown_report(report: dict[str, Any]) -> str:
         f"Original native video: `{report['original_final_path']}`",
         f"Contact sheet: `{report['contact_sheet']}`",
         f"Transcript: `{report.get('transcript_path') or ''}`",
+        f"Archived previous final: `{report.get('archived_previous_final') or ''}`",
         "",
         "## Clips",
         "",
