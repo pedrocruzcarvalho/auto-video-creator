@@ -34,6 +34,7 @@ Required keys:
 
 - `REPLICATE_API_TOKEN` for Seedance video generation
 - `OPENAI_API_KEY` for transcription and captions
+- `ANTHROPIC_API_KEY` for optional Claude-powered idea generation
 
 ## Run The App
 
@@ -53,8 +54,8 @@ The app includes built-in presets, so you do not need to type scripts or prompts
 
 To find a new concept without typing prompts:
 
-1. Open `Idea Lab - free, no video generation`.
-2. Click `Generate new idea batch`.
+1. Open `Idea Lab - no video generation`.
+2. Click `Generate local ideas` for free ideas, or `Generate Claude ideas` for a better paid text-only batch.
 3. Click `Use idea` on the best concept.
 4. Select the new `Idea:` scenario in the Scenario dropdown.
 5. Review the narration on the right.

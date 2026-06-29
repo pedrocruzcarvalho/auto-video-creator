@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import json
 import os
 import random
 import re
@@ -278,11 +279,13 @@ def _render_key_status() -> None:
     openai_ready = bool(os.getenv("OPENAI_API_KEY"))
     if replicate_ready and openai_ready:
         st.success("Ready: Seedance generation and caption transcription keys are loaded.")
-        return
-    if not replicate_ready:
-        st.error("Missing REPLICATE_API_TOKEN. Seedance video generation cannot run yet.")
-    if not openai_ready:
-        st.warning("Missing OPENAI_API_KEY. Video generation can run, but synced captions need this key.")
+    else:
+        if not replicate_ready:
+            st.error("Missing REPLICATE_API_TOKEN. Seedance video generation cannot run yet.")
+        if not openai_ready:
+            st.warning("Missing OPENAI_API_KEY. Video generation can run, but synced captions need this key.")
+    if os.getenv("ANTHROPIC_API_KEY"):
+        st.info("Claude Idea Lab is available. It only runs when you click the Claude idea button.")
 
 
 def _render_controls() -> SeedanceOptions:
@@ -478,6 +481,8 @@ def _init_state() -> None:
     st.session_state.setdefault("run_id", "seedance_sinking_car_v1")
     st.session_state.setdefault("seed", 42420)
     st.session_state.setdefault("idea_seed", 101)
+    st.session_state.setdefault("idea_source", "local")
+    st.session_state.setdefault("claude_ideas", None)
 
 
 def _safe_run_id(value: str) -> str:
@@ -507,14 +512,29 @@ def _available_presets() -> dict[str, dict[str, str]]:
 
 
 def _render_idea_lab() -> None:
-    with st.expander("Idea Lab - free, no video generation", expanded=False):
-        st.caption("Generate smart-survival ideas locally. Click one to turn it into a ready-to-generate preset.")
+    with st.expander("Idea Lab - no video generation", expanded=False):
+        st.caption("Generate smart-survival ideas. Local is free. Claude is optional and uses a small text API call.")
         c1, c2 = st.columns([0.5, 0.5])
-        if c1.button("Generate new idea batch", use_container_width=True):
+        if c1.button("Generate local ideas", use_container_width=True):
             st.session_state.idea_seed = int(st.session_state.get("idea_seed", 101)) + 1
-        c2.caption("This does not call Replicate or OpenAI.")
+            st.session_state.idea_source = "local"
+            st.session_state.claude_ideas = None
+        if c2.button("Generate Claude ideas", use_container_width=True):
+            try:
+                st.session_state.claude_ideas = _claude_idea_batch(count=6)
+                st.session_state.idea_source = "claude"
+            except Exception as exc:
+                st.session_state.claude_ideas = None
+                st.session_state.idea_source = "local"
+                st.error(f"Claude idea generation failed: {type(exc).__name__}: {exc}")
 
-        ideas = _idea_batch(int(st.session_state.get("idea_seed", 101)), count=4)
+        if st.session_state.get("idea_source") == "claude" and st.session_state.get("claude_ideas"):
+            ideas = st.session_state.claude_ideas
+            st.caption("Showing Claude ideas. No video was generated.")
+        else:
+            ideas = _idea_batch(int(st.session_state.get("idea_seed", 101)), count=4)
+            st.caption("Showing local ideas. No API calls were made.")
+
         for idea in ideas:
             with st.container(border=True):
                 st.markdown(f"**{idea['title']}**")
@@ -533,6 +553,97 @@ def _idea_batch(seed: int, *, count: int) -> list[dict[str, str | int]]:
     ideas = list(IDEAS)
     rng.shuffle(ideas)
     return ideas[:count]
+
+
+def _claude_idea_batch(*, count: int) -> list[dict[str, str | int]]:
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY is missing.")
+    try:
+        from anthropic import Anthropic
+    except ImportError as exc:
+        raise RuntimeError("Install dependencies with: python -m pip install -r requirements.txt") from exc
+
+    client = Anthropic()
+    response = client.messages.create(
+        model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
+        max_tokens=2600,
+        temperature=0.9,
+        system=(
+            "You are the idea strategist for Extreme Survival, a YouTube Shorts channel. "
+            "Create viral fictional smart-survival scenarios for 30-second 3D simulation Shorts. "
+            "Avoid gore, real tragedies, illegal advice, and repetitive water ideas. "
+            "Prefer everyday places, immediate danger, one wrong instinct, one nearby object, and one clever physical move."
+        ),
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"Generate {count} high-retention Extreme Survival video ideas as strict JSON only.\n"
+                    "Return a JSON array. Each object must have exactly these keys:\n"
+                    "title, run_id, place, character, danger, wrong_move, tool, move, payoff, score.\n\n"
+                    "Rules:\n"
+                    "- title: short YouTube idea, no numbering.\n"
+                    "- run_id: lowercase snake_case ending in _v1.\n"
+                    "- place: bright, clean fictional training set.\n"
+                    "- character: simple clothing phrase like gray hoodie or navy jacket.\n"
+                    "- danger: one visible moving danger.\n"
+                    "- wrong_move: one instinct viewers might do incorrectly.\n"
+                    "- tool: one nearby ordinary object to use.\n"
+                    "- move: one clever physical action using the tool.\n"
+                    "- payoff: one visually clear escape/payoff.\n"
+                    "- score: integer from 18 to 25.\n\n"
+                    "Make the ideas non-water unless one is exceptionally strong. No markdown."
+                ),
+            }
+        ],
+    )
+    text = "\n".join(getattr(block, "text", "") for block in response.content).strip()
+    raw_ideas = _loads_json_array(text)
+    ideas = [_normalize_claude_idea(item) for item in raw_ideas]
+    return [idea for idea in ideas if idea][:count]
+
+
+def _loads_json_array(text: str) -> list[dict[str, object]]:
+    cleaned = text.strip()
+    cleaned = re.sub(r"^```(?:json)?", "", cleaned).strip()
+    cleaned = re.sub(r"```$", "", cleaned).strip()
+    start = cleaned.find("[")
+    end = cleaned.rfind("]")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("Claude did not return a JSON array.")
+    payload = json.loads(cleaned[start : end + 1])
+    if not isinstance(payload, list):
+        raise ValueError("Claude JSON was not a list.")
+    return [item for item in payload if isinstance(item, dict)]
+
+
+def _normalize_claude_idea(item: dict[str, object]) -> dict[str, str | int]:
+    title = _clean_idea_field(item.get("title"), "Untitled survival idea")
+    run_id = _safe_run_id(_clean_idea_field(item.get("run_id"), title))
+    if not run_id.endswith("_v1"):
+        run_id = f"{run_id}_v1"
+    score_raw = item.get("score", 20)
+    try:
+        score = max(18, min(25, int(score_raw)))
+    except (TypeError, ValueError):
+        score = 20
+    return {
+        "title": title,
+        "run_id": run_id,
+        "place": _clean_idea_field(item.get("place"), "bright training set"),
+        "character": _clean_idea_field(item.get("character"), "gray hoodie"),
+        "danger": _clean_idea_field(item.get("danger"), "a visible moving danger"),
+        "wrong_move": _clean_idea_field(item.get("wrong_move"), "panic and move straight toward the danger"),
+        "tool": _clean_idea_field(item.get("tool"), "a nearby ordinary object"),
+        "move": _clean_idea_field(item.get("move"), "use the object to create one second of space"),
+        "payoff": _clean_idea_field(item.get("payoff"), "you escape into a clear safe zone"),
+        "score": score,
+    }
+
+
+def _clean_idea_field(value: object, fallback: str) -> str:
+    text = str(value or fallback)
+    return " ".join(text.replace('"', "").replace("'", "").split())[:180]
 
 
 def _preset_from_idea(idea: dict[str, str | int]) -> dict[str, str]:

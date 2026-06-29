@@ -21,6 +21,7 @@ Do **not** run paid video generation unless Pedro explicitly asks for a generati
 Paid actions include:
 
 - calling Replicate Seedance;
+- calling Claude/Anthropic unless the user asks for Claude idea generation or clicks the app button themselves;
 - running the Streamlit generate button through automation;
 - any script path that invokes `run_seedance_native_pipeline`;
 - any external AI video model test.
@@ -52,7 +53,7 @@ Main app:
 - Run with: `streamlit run streamlit_app.py`
 - App name: `Seedance Survival Studio`
 - Built-in presets include `Sinking car water tank`, `Conveyor belt pulls you toward rollers`, `Walk-in freezer locks behind you`, and `Escalator step collapses under you`.
-- The app also has `Idea Lab - free, no video generation`, which creates local smart-survival idea presets without calling paid APIs.
+- The app also has `Idea Lab - no video generation`, which creates smart-survival idea presets. Local mode is free. Claude mode uses a small Anthropic text call and should only run when the user explicitly requests it or clicks the app button.
 - Use `Custom` only when manually testing a new script and visual prompt.
 
 CLI:
