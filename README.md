@@ -61,22 +61,27 @@ To find a new concept without typing prompts:
 
 1. Open `Idea Lab - no video generation`.
 2. Click `Generate local ideas` for free ideas, or `Generate Claude ideas` for a better paid text-only batch.
-3. Click `Use idea` on the best concept.
-4. Select the new `Idea:` scenario in the Scenario dropdown.
-5. Review the narration on the right.
-6. Click `Generate Seedance Short` only when ready to spend.
+3. Click `Generate video` on the best concept when ready to spend.
+
+For a slower review flow, click `Use idea`, select the new `Idea:` scenario, review the narration, then click `Generate Seedance Short`.
 
 At 720p the planning estimate is about **$6 per 30-second Short**:
 
 - clip 1: about `$2.70`
 - continuation clip 2: about `$3.30`
 
-Caption rebuilds do not require regenerating Seedance clips when reuse is on.
+Caption rebuilds do not require regenerating Seedance clips when reuse is on. Rerunning a completed run id reuses the existing `final.mp4` and does not call Seedance again unless `--fresh` is used.
 
 ## Run CLI
 
 ```powershell
 python main.py "Sinking car water tank" --run-id seedance_sinking_car_v1
+```
+
+Recommended terminal preset:
+
+```powershell
+python main.py --preset warehouse_shelf_collapse --run-id warehouse_shelf_collapse_v1 --resolution 720p
 ```
 
 Useful options:

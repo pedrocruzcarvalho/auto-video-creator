@@ -360,9 +360,12 @@ def _render_controls() -> SeedanceOptions:
     st.session_state.clip_1_visual = clip_1_visual
     st.session_state.clip_2_visual = clip_2_visual
 
-    if st.button("Generate Seedance Short", type="primary", use_container_width=True):
+    auto_generate = bool(st.session_state.get("auto_generate_selected_idea", False))
+    if auto_generate:
+        st.session_state.auto_generate_selected_idea = False
+
+    if st.button("Generate Seedance Short", type="primary", use_container_width=True) or auto_generate:
         st.session_state.run_clicked = True
-        st.rerun()
 
     return SeedanceOptions(
         run_id=_safe_run_id(topic),
@@ -446,6 +449,8 @@ def _render_result() -> None:
     if final_path.exists():
         st.video(str(final_path))
         st.success(f"Final: `{final_path}`")
+        if result.get("reused_existing_final"):
+            st.info("This reused an existing final video, so no new Seedance generation was run.")
 
     tab_final, tab_review, tab_files = st.tabs(["Transcript", "Review Frames", "Files"])
     with tab_final:
@@ -479,6 +484,7 @@ def _init_state() -> None:
     st.session_state.setdefault("idea_seed", 101)
     st.session_state.setdefault("idea_source", "local")
     st.session_state.setdefault("claude_ideas", None)
+    st.session_state.setdefault("auto_generate_selected_idea", False)
 
 
 def _safe_run_id(value: str) -> str:
@@ -542,6 +548,13 @@ def _render_idea_lab() -> None:
                     st.session_state.selected_preset = preset["title"]
                     st.session_state.run_id = preset["run_id"]
                     st.success(f"Loaded: {idea['title']}. Close Idea Lab and select it in Scenario.")
+                if st.button(f"Generate video: {idea['title']}", key=f"generate_{idea['run_id']}", use_container_width=True):
+                    preset = _preset_from_idea(idea)
+                    st.session_state.idea_preset = preset
+                    st.session_state.selected_preset = preset["title"]
+                    st.session_state.run_id = preset["run_id"]
+                    st.session_state.auto_generate_selected_idea = True
+                    st.success(f"Loaded and queued: {idea['title']}. Generation will start with the settings below.")
 
 
 def _idea_batch(seed: int, *, count: int) -> list[dict[str, str | int]]:

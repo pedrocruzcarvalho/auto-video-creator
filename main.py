@@ -15,6 +15,7 @@ from pipeline.seedance_native import (
     SeedanceOptions,
     run_seedance_native_pipeline,
 )
+from pipeline.progress import ProgressEvent
 
 
 CLI_PRESETS = {
@@ -75,9 +76,15 @@ def run(
     fresh: bool = False,
 ) -> Path:
     selected = CLI_PRESETS[preset] if preset else _preset_for_topic(topic)
+    resolved_run_id = run_id or selected.get("run_id") or _default_run_id(topic)
+    print(f"Extreme Survival generation")
+    print(f"Preset/topic: {selected.get('topic') or topic}")
+    print(f"Run folder: output\\{resolved_run_id}")
+    print(f"Resolution: {resolution}")
+    print("Starting...")
     result = run_seedance_native_pipeline(
         SeedanceOptions(
-            run_id=run_id or selected.get("run_id") or _default_run_id(topic),
+            run_id=resolved_run_id,
             script_part_1=selected["script_part_1"],
             script_part_2=selected["script_part_2"],
             clip_1_visual=selected["clip_1_visual"],
@@ -87,10 +94,21 @@ def run(
             add_captions=not no_captions,
             use_voice_reference=not no_voice_reference,
             resume=not fresh,
-        )
+        ),
+        progress_callback=_print_progress,
     )
     final_path = Path(result["final_path"])
-    print(final_path)
+    print("")
+    print("DONE")
+    print(f"Final video: {final_path}")
+    print(f"Output folder: {final_path.parent}")
+    print(f"Duration: {result.get('duration_seconds')}s")
+    estimate = float(result.get("estimate", {}).get("total_usd", 0))
+    if result.get("reused_existing_final"):
+        print("New Seedance cost this run: $0.00 (reused existing final)")
+        print(f"Fresh-run estimate for this setting: ${estimate:.2f}")
+    else:
+        print(f"Estimated video cost for this fresh run: ${estimate:.2f}")
     return final_path
 
 
@@ -126,6 +144,14 @@ def _preset_for_topic(topic: str) -> dict[str, str]:
         "clip_1_visual": DEFAULT_CLIP_1_VISUAL,
         "clip_2_visual": DEFAULT_CLIP_2_VISUAL,
     }
+
+
+def _print_progress(event: ProgressEvent) -> None:
+    data = event.to_dict()
+    worker = data.get("worker", "Step")
+    status = data.get("status", "")
+    message = data.get("message", "")
+    print(f"[{worker}] {status}: {message}")
 
 
 if __name__ == "__main__":

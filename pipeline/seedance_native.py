@@ -98,6 +98,14 @@ def run_seedance_native_pipeline(options: SeedanceOptions, progress_callback: Pr
 
     base = run_dir(options.run_id)
     base.mkdir(parents=True, exist_ok=True)
+    report_path = base / "run_report.json"
+    expected_final = base / ("final.mp4" if options.add_captions else "final_seedance_native.mp4")
+    if options.resume and _file_valid(expected_final) and report_path.exists():
+        emit(progress_callback, "Setup", "done", f"Reusing existing final: {expected_final}", progress=1, artifact_path=expected_final)
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report["reused_existing_final"] = True
+        return report
+
     clips_dir = base / "clips"
     review_dir = base / "review_frames"
     clips_dir.mkdir(parents=True, exist_ok=True)
@@ -148,9 +156,16 @@ def run_seedance_native_pipeline(options: SeedanceOptions, progress_callback: Pr
     word_timestamps_path = None
     final_path = original_final
     if options.add_captions:
-        emit(progress_callback, "Captions", "running", "Transcribing native audio and burning subtitles", progress=0.1)
-        final_path, word_timestamps_path = _caption_native_video(original_final, base)
-        emit(progress_callback, "Captions", "done", "Captioned final ready", progress=1, artifact_path=final_path)
+        captioned_path = base / "final.mp4"
+        words_path = base / "native_words.json"
+        if options.resume and _file_valid(captioned_path) and _file_valid(words_path):
+            final_path = captioned_path
+            word_timestamps_path = words_path
+            emit(progress_callback, "Captions", "done", "Reusing existing captions", progress=1, artifact_path=final_path)
+        else:
+            emit(progress_callback, "Captions", "running", "Transcribing native audio and burning subtitles", progress=0.1)
+            final_path, word_timestamps_path = _caption_native_video(original_final, base)
+            emit(progress_callback, "Captions", "done", "Captioned final ready", progress=1, artifact_path=final_path)
     else:
         emit(progress_callback, "Captions", "done", "Captions skipped", progress=1)
 
@@ -172,6 +187,7 @@ def run_seedance_native_pipeline(options: SeedanceOptions, progress_callback: Pr
         "contact_sheet": str(contact),
         "review_frames": [str(path) for path in frames],
         "estimate": estimate_seedance_cost(options.resolution),
+        "reused_existing_final": False,
         "script": f"{options.script_part_1} {options.script_part_2}",
     }
     (base / "run_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")

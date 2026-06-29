@@ -34,6 +34,7 @@ Safe actions without confirmation:
 - updating docs/prompts/UI;
 - using the local Idea Lab;
 - starting Streamlit locally, as long as no generation is triggered.
+- rerunning an existing completed run id with resume enabled, because it reuses `final.mp4` without calling Seedance.
 
 ## Current Technical Workflow
 
@@ -60,6 +61,12 @@ CLI:
 
 ```powershell
 python main.py "Sinking car water tank" --run-id seedance_sinking_car_v1
+```
+
+Recommended banger terminal preset:
+
+```powershell
+python main.py --preset warehouse_shelf_collapse --run-id warehouse_shelf_collapse_v1 --resolution 720p
 ```
 
 Useful options:
