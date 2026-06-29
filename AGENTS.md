@@ -43,8 +43,8 @@ Main pipeline:
 - Model: `bytedance/seedance-2.0` through Replicate.
 - Default output: two 15-second 9:16 clips.
 - Clip 1: native Seedance voice/audio.
-- Bridge: extract last frame and audio/video reference from clip 1.
-- Clip 2: starts from clip 1 final frame, with clip 1 audio/video reference when enabled.
+- Bridge: extract the final frame from clip 1.
+- Clip 2: starts from clip 1 final frame. Do not send audio/video references together with the first-frame image because Seedance rejects that input combination.
 - Final: stitch both clips, optionally transcribe audio with OpenAI Whisper, burn ASS captions with FFmpeg.
 
 Main app:
@@ -105,7 +105,6 @@ For the next real test:
 - Scenario: preferably `Conveyor belt pulls you toward rollers` for a non-water smart-survival test, or another built-in preset.
 - Quality: `720p`
 - Add synced captions: `on`
-- Keep voice consistent between clips: `on`
 - Reuse existing clips if present: `on`
 - Seed: keep default unless testing variations.
 

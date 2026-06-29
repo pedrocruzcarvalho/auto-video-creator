@@ -119,20 +119,14 @@ def run_seedance_native_pipeline(options: SeedanceOptions, progress_callback: Pr
     )
     emit(progress_callback, "Clip 1", "done", "First clip ready", progress=1, artifact_path=clip1)
 
-    emit(progress_callback, "Bridge", "running", "Extracting last frame and voice reference", progress=0.2)
+    emit(progress_callback, "Bridge", "running", "Extracting last frame", progress=0.2)
     last_frame = base / "part_01_last_frame.jpg"
     if not options.resume or not _file_valid(last_frame):
         run_ffmpeg(["-sseof", "-0.08", "-i", str(clip1), "-frames:v", "1", "-q:v", "2", str(last_frame)])
     last_frame_url = _file_url(client.files.create(last_frame))
     reference_audio_urls: list[str] = []
     reference_video_urls: list[str] = []
-    if options.use_voice_reference:
-        voice_reference = base / "part_01_voice_reference.wav"
-        if not options.resume or not _file_valid(voice_reference):
-            run_ffmpeg(["-i", str(clip1), "-vn", "-t", "15", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", str(voice_reference)])
-        reference_audio_urls = [_file_url(client.files.create(voice_reference))]
-        reference_video_urls = [_file_url(client.files.create(clip1))]
-    emit(progress_callback, "Bridge", "done", "Clip 2 reference package ready", progress=1, artifact_path=last_frame)
+    emit(progress_callback, "Bridge", "done", "Last-frame continuation ready", progress=1, artifact_path=last_frame)
 
     clip2 = clips_dir / "part_02.mp4"
     emit(progress_callback, "Clip 2", "running", "Generating continuation from last frame", progress=0.1)
@@ -172,7 +166,7 @@ def run_seedance_native_pipeline(options: SeedanceOptions, progress_callback: Pr
         "duration_seconds": round(ffprobe_duration(final_path), 2),
         "clip_paths": [str(clip1), str(clip2)],
         "last_frame_path": str(last_frame),
-        "voice_reference_used_for_clip2": options.use_voice_reference,
+        "voice_reference_used_for_clip2": bool(reference_audio_urls or reference_video_urls),
         "word_timestamps_path": str(word_timestamps_path) if word_timestamps_path else None,
         "transcript_path": str(base / "native_transcript.txt") if (base / "native_transcript.txt").exists() else None,
         "contact_sheet": str(contact),
@@ -222,6 +216,9 @@ def _run_seedance(
     }
     if first_frame_url:
         request_input["image"] = first_frame_url
+    if first_frame_url and (reference_audio_urls or reference_video_urls):
+        reference_audio_urls = []
+        reference_video_urls = []
     if reference_audio_urls:
         request_input["reference_audios"] = reference_audio_urls
     if reference_video_urls:

@@ -325,11 +325,8 @@ def _render_controls() -> SeedanceOptions:
 
     st.subheader("2. Output")
     add_captions = st.toggle("Add synced captions", value=True, help="Transcribe Seedance audio, clean obvious errors, and burn subtitles with FFmpeg.")
-    use_voice_reference = st.toggle(
-        "Keep voice consistent between clips",
-        value=True,
-        help="Pass clip 1 audio into clip 2 as a Seedance voice reference.",
-    )
+    st.info("Clip 2 uses the final frame from clip 1 for visual continuity. Seedance does not allow voice/audio references together with first-frame continuation.")
+    use_voice_reference = False
     resume = st.toggle("Reuse existing clips if present", value=True, help="Useful for caption-only rebuilds without paying for video again.")
 
     estimate = estimate_seedance_cost(str(resolution))
@@ -386,8 +383,8 @@ def _render_preview_panel(options: SeedanceOptions) -> None:
     st.markdown(
         """
         <div class="step">1. Generate clip 1 with Seedance native voice and sound.</div>
-        <div class="step">2. Extract the final frame and clip 1 voice reference.</div>
-        <div class="step">3. Generate clip 2 from that frame, matching the same voice.</div>
+        <div class="step">2. Extract the final frame from clip 1.</div>
+        <div class="step">3. Generate clip 2 from that frame for visual continuity.</div>
         <div class="step">4. Stitch both clips, transcribe the native audio, and add clean captions.</div>
         """,
         unsafe_allow_html=True,
@@ -435,7 +432,7 @@ def _render_result() -> None:
 
     result = st.session_state.get("result")
     if not result:
-        st.info("Ready. Start with the preset, 720p, captions on, voice reference on.")
+        st.info("Ready. Start with a preset, 720p, captions on, and one fresh run id.")
         return
 
     st.subheader("Result")

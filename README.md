@@ -9,7 +9,7 @@ The current workflow is Seedance-first:
 - generate two 15-second Seedance clips;
 - extract the last frame from clip 1;
 - start clip 2 from that exact frame;
-- pass clip 1 audio/video as a reference for clip 2;
+- use clip 1's final frame as the first frame for clip 2;
 - stitch the native-audio clips;
 - transcribe the native audio;
 - burn clean synced subtitles with FFmpeg.
@@ -51,8 +51,9 @@ Recommended first run:
 - Scenario: `Conveyor belt pulls you toward rollers` for a non-water smart-survival test, or `Sinking car water tank` for the known baseline
 - Quality: `720p`
 - Add synced captions: on
-- Keep voice consistent between clips: on
 - Reuse existing clips: on
+
+Seedance does not allow audio/video references together with first-frame continuation, so the current workflow prioritizes visual continuity.
 
 The app includes built-in presets, so you do not need to type scripts or prompts for normal runs. Use `Custom` only when testing a new manually written idea.
 
