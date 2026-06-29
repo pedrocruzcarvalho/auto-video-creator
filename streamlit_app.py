@@ -1,6 +1,7 @@
 ﻿from __future__ import annotations
 
 import os
+import random
 import re
 import sys
 from pathlib import Path
@@ -146,6 +147,105 @@ PRESETS = {
     },
 }
 
+IDEAS = [
+    {
+        "title": "Vending machine tips over toward you",
+        "run_id": "vending_machine_tip_v1",
+        "place": "bright break-room training set",
+        "character": "gray hoodie",
+        "danger": "a heavy vending machine tipping forward",
+        "wrong_move": "push against the front glass",
+        "tool": "a rolling office chair",
+        "move": "kick the chair under the falling edge and roll sideways away",
+        "payoff": "the machine lands on the chair instead of the floor space where you were",
+        "score": 23,
+    },
+    {
+        "title": "Garage door closes while you crawl under it",
+        "run_id": "garage_door_trap_v1",
+        "place": "clean garage training set",
+        "character": "navy sweatshirt",
+        "danger": "a heavy garage door dropping fast",
+        "wrong_move": "try to hold the door with your back",
+        "tool": "a toolbox sitting beside the track",
+        "move": "shove the toolbox into the side track and roll under the gap",
+        "payoff": "the door jams for one second and you clear the threshold",
+        "score": 22,
+    },
+    {
+        "title": "Warehouse shelf starts collapsing beside you",
+        "run_id": "warehouse_shelf_collapse_v1",
+        "place": "bright warehouse training aisle",
+        "character": "gray work shirt",
+        "danger": "a tall metal shelf tilting over with boxes sliding down",
+        "wrong_move": "run straight down the aisle",
+        "tool": "a low pallet jack",
+        "move": "drop behind the pallet jack and slide sideways under the lowest shelf gap",
+        "payoff": "boxes crash over the pallet jack while you slide clear",
+        "score": 24,
+    },
+    {
+        "title": "Elevator doors open to an empty shaft",
+        "run_id": "empty_elevator_shaft_v1",
+        "place": "clean office elevator training set",
+        "character": "dark blue shirt",
+        "danger": "elevator doors opening to a dark empty shaft",
+        "wrong_move": "step forward before looking down",
+        "tool": "an umbrella in your hand",
+        "move": "tap the floor space first, then wedge the umbrella handle into the door track",
+        "payoff": "the doors stay open long enough for you to step back safely",
+        "score": 23,
+    },
+    {
+        "title": "Glass bridge cracks under your feet",
+        "run_id": "glass_bridge_crack_v1",
+        "place": "bright indoor glass bridge training set",
+        "character": "navy jacket",
+        "danger": "glass floor cracking under both shoes",
+        "wrong_move": "jump on one foot",
+        "tool": "a flat backpack",
+        "move": "drop the backpack flat and crawl across it to spread your weight",
+        "payoff": "the cracks spread slower while you reach the metal frame",
+        "score": 24,
+    },
+    {
+        "title": "Moving walkway pulls your shoelace under",
+        "run_id": "moving_walkway_lace_v1",
+        "place": "clean airport moving walkway training set",
+        "character": "gray hoodie",
+        "danger": "a shoelace being pulled into the moving walkway comb plate",
+        "wrong_move": "pull your foot straight backward",
+        "tool": "a hard suitcase handle",
+        "move": "jam the suitcase handle across the comb plate and slip your foot out sideways",
+        "payoff": "the lace snaps loose while your foot clears the teeth",
+        "score": 22,
+    },
+    {
+        "title": "Forklift load slides off above you",
+        "run_id": "forklift_load_slide_v1",
+        "place": "bright warehouse loading bay training set",
+        "character": "gray work shirt",
+        "danger": "stacked boxes sliding off a raised forklift",
+        "wrong_move": "run under the falling load",
+        "tool": "a long cardboard tube",
+        "move": "push the tube against the stack to redirect the first box and step behind a pillar",
+        "payoff": "the boxes spill to the side while the pillar shields you",
+        "score": 21,
+    },
+    {
+        "title": "Restaurant freezer shelf falls from above",
+        "run_id": "freezer_shelf_fall_v1",
+        "place": "bright restaurant freezer training set",
+        "character": "dark blue shirt",
+        "danger": "a loaded freezer shelf snapping loose overhead",
+        "wrong_move": "reach up with bare hands",
+        "tool": "a plastic food crate",
+        "move": "raise the crate like a shield and step into the doorway corner",
+        "payoff": "frozen boxes hit the crate while you slide out through the doorway",
+        "score": 22,
+    },
+]
+
 
 def main() -> None:
     load_environment()
@@ -187,16 +287,22 @@ def _render_key_status() -> None:
 
 def _render_controls() -> SeedanceOptions:
     st.subheader("1. Short Setup")
+    _render_idea_lab()
+    available_presets = _available_presets()
+    scenario_options = [*available_presets.keys(), "Custom"]
+    selected_preset = st.session_state.get("selected_preset")
+    scenario_index = scenario_options.index(selected_preset) if selected_preset in scenario_options else 0
+
     preset = st.selectbox(
         "Scenario",
-        [*PRESETS.keys(), "Custom"],
-        index=0,
+        scenario_options,
+        index=scenario_index,
     )
 
     if st.session_state.get("selected_preset") != preset:
         st.session_state.selected_preset = preset
-        if preset in PRESETS:
-            st.session_state.run_id = PRESETS[preset]["run_id"]
+        if preset in available_presets:
+            st.session_state.run_id = available_presets[preset]["run_id"]
 
     st.session_state.setdefault("run_id", _preset_value(preset, "run_id", "seedance_short"))
     topic = st.text_input(
@@ -229,11 +335,11 @@ def _render_controls() -> SeedanceOptions:
     m2.metric("Clip 2", f"${estimate['clip_2_usd']:.2f}")
     m3.metric("Total", f"${estimate['total_usd']:.2f}")
 
-    if preset in PRESETS:
-        script_part_1 = PRESETS[preset]["script_part_1"]
-        script_part_2 = PRESETS[preset]["script_part_2"]
-        clip_1_visual = PRESETS[preset]["clip_1_visual"]
-        clip_2_visual = PRESETS[preset]["clip_2_visual"]
+    if preset in available_presets:
+        script_part_1 = available_presets[preset]["script_part_1"]
+        script_part_2 = available_presets[preset]["script_part_2"]
+        clip_1_visual = available_presets[preset]["clip_1_visual"]
+        clip_2_visual = available_presets[preset]["clip_2_visual"]
     else:
         script_part_1 = st.session_state.get("script_part_1", DEFAULT_SCRIPT_PART_1)
         script_part_2 = st.session_state.get("script_part_2", DEFAULT_SCRIPT_PART_2)
@@ -242,7 +348,7 @@ def _render_controls() -> SeedanceOptions:
 
     with st.expander("Advanced script and visual prompts", expanded=(preset == "Custom")):
         st.caption("Keep each part around 15 seconds. Seedance speaks each part separately.")
-        disabled = preset in PRESETS
+        disabled = preset in available_presets
         script_part_1 = st.text_area("Narration clip 1", value=script_part_1, height=110, disabled=disabled)
         script_part_2 = st.text_area("Narration clip 2", value=script_part_2, height=110, disabled=disabled)
         clip_1_visual = st.text_area("Visual prompt clip 1", value=clip_1_visual, height=240, disabled=disabled)
@@ -371,6 +477,7 @@ def _init_state() -> None:
     st.session_state.setdefault("run_clicked", False)
     st.session_state.setdefault("run_id", "seedance_sinking_car_v1")
     st.session_state.setdefault("seed", 42420)
+    st.session_state.setdefault("idea_seed", 101)
 
 
 def _safe_run_id(value: str) -> str:
@@ -379,9 +486,110 @@ def _safe_run_id(value: str) -> str:
 
 
 def _preset_value(preset: str, key: str, fallback: str) -> str:
-    if preset in PRESETS:
-        return str(PRESETS[preset][key])
+    presets = _available_presets()
+    if preset in presets:
+        return str(presets[preset][key])
     return fallback
+
+
+def _available_presets() -> dict[str, dict[str, str]]:
+    presets = dict(PRESETS)
+    idea_preset = st.session_state.get("idea_preset")
+    if isinstance(idea_preset, dict):
+        presets[str(idea_preset["title"])] = {
+            "run_id": str(idea_preset["run_id"]),
+            "script_part_1": str(idea_preset["script_part_1"]),
+            "script_part_2": str(idea_preset["script_part_2"]),
+            "clip_1_visual": str(idea_preset["clip_1_visual"]),
+            "clip_2_visual": str(idea_preset["clip_2_visual"]),
+        }
+    return presets
+
+
+def _render_idea_lab() -> None:
+    with st.expander("Idea Lab - free, no video generation", expanded=False):
+        st.caption("Generate smart-survival ideas locally. Click one to turn it into a ready-to-generate preset.")
+        c1, c2 = st.columns([0.5, 0.5])
+        if c1.button("Generate new idea batch", use_container_width=True):
+            st.session_state.idea_seed = int(st.session_state.get("idea_seed", 101)) + 1
+        c2.caption("This does not call Replicate or OpenAI.")
+
+        ideas = _idea_batch(int(st.session_state.get("idea_seed", 101)), count=4)
+        for idea in ideas:
+            with st.container(border=True):
+                st.markdown(f"**{idea['title']}**")
+                st.caption(f"Score {idea['score']}/25 | Smart move: {idea['move']}")
+                st.write(f"Wrong instinct: {idea['wrong_move']}. Useful object: {idea['tool']}.")
+                if st.button(f"Use idea: {idea['title']}", key=f"use_{idea['run_id']}", use_container_width=True):
+                    preset = _preset_from_idea(idea)
+                    st.session_state.idea_preset = preset
+                    st.session_state.selected_preset = preset["title"]
+                    st.session_state.run_id = preset["run_id"]
+                    st.success(f"Loaded: {idea['title']}. Close Idea Lab and select it in Scenario.")
+
+
+def _idea_batch(seed: int, *, count: int) -> list[dict[str, str | int]]:
+    rng = random.Random(seed)
+    ideas = list(IDEAS)
+    rng.shuffle(ideas)
+    return ideas[:count]
+
+
+def _preset_from_idea(idea: dict[str, str | int]) -> dict[str, str]:
+    title = str(idea["title"])
+    place = str(idea["place"])
+    character = str(idea["character"])
+    danger = str(idea["danger"])
+    wrong_move = str(idea["wrong_move"])
+    tool = str(idea["tool"])
+    move = str(idea["move"])
+    payoff = str(idea["payoff"])
+    run_id = str(idea["run_id"])
+    script_part_1 = (
+        f"You are in a {place} when {danger} happens right in front of you. "
+        f"Do not {wrong_move}. Look around fast. The useful object is {tool}. "
+        "Move before the danger reaches you."
+    )
+    script_part_2 = (
+        f"Use {tool} to create one second of space. "
+        f"The smart move is to {move}. "
+        f"That is enough time: {payoff}."
+    )
+    style = (
+        "Vertical 9:16 glossy viral 3D survival simulation, clearly fictional CGI. "
+        f"Same adult male training avatar, brown hair, {character}, realistic hands, {place}, clean readable lighting. "
+        f"Show {danger}, {tool}, and the surrounding objects clearly. Dynamic camera, fast push-ins, snap zooms, macro object close-ups. "
+        "Camera always points to the exact narrated object. Not live-action, not real accident footage, not children's cartoon, not Pixar. "
+        "No on-screen text, no captions, no letters, no numbers, no logos, no signs, no UI, no watermark."
+    )
+    clip_1_visual = (
+        f"{style}\n\n"
+        "Create part 1 of a continuous fictional smart survival simulation. Native serious male narrator plus object impacts, mechanical rumble, "
+        "fast whooshes, close-up hits, and bass impacts.\n\n"
+        f"0-2s: show the avatar in {place} as {danger} begins suddenly, camera snaps toward the danger.\n"
+        f"2-5s: macro close-up of the worst point of danger moving closer.\n"
+        f"5-8s: show the wrong instinct, {wrong_move}, beginning for a split second, then stopping.\n"
+        f"8-11s: whip pan and push-in to {tool} nearby, clearly reachable.\n"
+        f"11-15s: avatar moves sideways and grabs {tool}, end on his hands holding it while the danger closes in."
+    )
+    clip_2_visual = (
+        f"{style} Continue exactly from the input first frame. Same avatar, same location, same danger, same {tool}. "
+        "No on-screen text, no captions, no letters, no numbers, no logos, no signs, no UI, no watermark.\n\n"
+        "Continue the smart survival simulation with native serious male narrator plus object scrape, impact hit, short alarm chirp, and final relief sound.\n\n"
+        f"0-3s: begin on the same hands holding {tool} as {danger} moves closer.\n"
+        f"3-6s: macro shot as he positions {tool} exactly where it can interrupt the danger.\n"
+        f"6-10s: snap zoom on the survival move: {move}.\n"
+        f"10-13s: camera follows the avatar escaping sideways through the opening created by the move.\n"
+        f"13-15s: final clear payoff shot: {payoff}."
+    )
+    return {
+        "title": f"Idea: {title}",
+        "run_id": run_id,
+        "script_part_1": script_part_1,
+        "script_part_2": script_part_2,
+        "clip_1_visual": clip_1_visual,
+        "clip_2_visual": clip_2_visual,
+    }
 
 
 def _inject_css() -> None:

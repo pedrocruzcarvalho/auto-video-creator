@@ -51,6 +51,15 @@ Recommended first run:
 
 The app includes built-in presets, so you do not need to type scripts or prompts for normal runs. Use `Custom` only when testing a new manually written idea.
 
+To find a new concept without typing prompts:
+
+1. Open `Idea Lab - free, no video generation`.
+2. Click `Generate new idea batch`.
+3. Click `Use idea` on the best concept.
+4. Select the new `Idea:` scenario in the Scenario dropdown.
+5. Review the narration on the right.
+6. Click `Generate Seedance Short` only when ready to spend.
+
 At 720p the planning estimate is about **$6 per 30-second Short**:
 
 - clip 1: about `$2.70`

@@ -31,6 +31,7 @@ Safe actions without confirmation:
 - running `python -m py_compile`;
 - running import/cost-estimate smoke checks;
 - updating docs/prompts/UI;
+- using the local Idea Lab;
 - starting Streamlit locally, as long as no generation is triggered.
 
 ## Current Technical Workflow
@@ -51,6 +52,7 @@ Main app:
 - Run with: `streamlit run streamlit_app.py`
 - App name: `Seedance Survival Studio`
 - Built-in presets include `Sinking car water tank`, `Conveyor belt pulls you toward rollers`, `Walk-in freezer locks behind you`, and `Escalator step collapses under you`.
+- The app also has `Idea Lab - free, no video generation`, which creates local smart-survival idea presets without calling paid APIs.
 - Use `Custom` only when manually testing a new script and visual prompt.
 
 CLI:
