@@ -1,527 +1,297 @@
 from __future__ import annotations
 
+import os
+import re
+import sys
 from pathlib import Path
-import time
-from typing import Any
+
+sys.dont_write_bytecode = True
 
 import streamlit as st
 
-from pipeline.fern import WORKERS, FernRunOptions, run_fern_pipeline
+from pipeline.config import load_environment
 from pipeline.progress import ProgressEvent
+from pipeline.seedance_native import (
+    DEFAULT_CLIP_1_VISUAL,
+    DEFAULT_CLIP_2_VISUAL,
+    DEFAULT_SCRIPT_PART_1,
+    DEFAULT_SCRIPT_PART_2,
+    WORKERS,
+    SeedanceOptions,
+    estimate_seedance_cost,
+    run_seedance_native_pipeline,
+)
 
 
-STATUS_ICONS = {
-    "waiting": "IDLE",
-    "running": "RUN",
-    "done": "OK",
-    "failed": "!",
+STATUS_LABELS = {
+    "waiting": "Waiting",
+    "running": "Running",
+    "done": "Done",
+    "failed": "Failed",
 }
 
 
 def main() -> None:
-    st.set_page_config(page_title="Fern Documentary Control Room", page_icon=":movie_camera:", layout="wide")
+    load_environment()
+    st.set_page_config(page_title="Exit Scenario Studio", page_icon="!", layout="wide")
     _inject_css()
     _init_state()
 
-    st.markdown('<div class="topline">AI Documentary Production Control</div>', unsafe_allow_html=True)
-    st.title("Fern / Blackfiles-Style Video Generator")
+    st.markdown('<div class="eyebrow">Exit Scenario</div>', unsafe_allow_html=True)
+    st.title("Seedance Shorts Studio")
+    st.caption("Two 15-second Seedance clips, last-frame continuation, native voice, synced captions.")
+    _render_key_status()
 
-    with st.sidebar:
-        st.header("Run Controls")
-        topic = st.text_area(
-            "Topic",
-            value="The bizarre story of the 1904 Olympic marathon",
-            height=90,
-            help="The subject Claude plans, scripts, and visually directs.",
-        )
-        target_minutes = st.number_input(
-            "Target video length (minutes)",
-            min_value=0.5,
-            max_value=60.0,
-            value=3.0,
-            step=0.5,
-            help="The intended final runtime. This sizes the narration, beat timeline, and rough TTS cost.",
-        )
-        max_budget = st.number_input(
-            "Max budget (USD)",
-            min_value=0.0,
-            max_value=500.0,
-            value=5.0,
-            step=0.5,
-            help="The spending ceiling Claude should plan under. Dry-run never spends it.",
-        )
-        run_id = st.text_input(
-            "run_id",
-            value=_default_run_id(topic),
-            help="The output folder name. Files are saved under output/<run_id>/ and reused when resume is on.",
-        )
-        style_preset = st.text_input(
-            "Style preset",
-            value="Fern-style AI documentary",
-            help="The visual and editorial style lock passed into the planner and prompts.",
-        )
-        quality_mode = st.segmented_control(
-            "Quality mode",
-            options=["cheap", "balanced", "high"],
-            default="balanced",
-            help="Cheap plans fewer/lower-cost assets, balanced is the default, high allows a denser plan and higher assumed unit costs.",
-        )
-        max_video_clips = st.number_input(
-            "Max generated video clips",
-            min_value=0,
-            max_value=50,
-            value=3,
-            step=1,
-            help="Hard cap on expensive AI video moments. These are only for key dramatic beats, not every second.",
-        )
-        max_stills = st.number_input(
-            "Max generated still/reference images",
-            min_value=1,
-            max_value=200,
-            value=12,
-            step=1,
-            help="Hard cap for generated reference assets and still plates: characters, environments, documents, and beat images.",
-        )
-        call_replicate = st.checkbox(
-            "Actually call Replicate / render video",
-            value=False,
-            help="Off means dry-run: write the plan and manifests only. On allows real image generation, TTS, and assembly.",
-        )
-        resume = st.checkbox(
-            "Resume and reuse existing outputs",
-            value=True,
-            help="When on, existing plan/assets in output/<run_id>/ are reused instead of regenerated where possible.",
-        )
+    left, right = st.columns([0.42, 0.58], gap="large")
+    with left:
+        options = _render_controls()
+    with right:
+        _render_preview_panel(options)
 
-        with st.expander("What these controls mean", expanded=False):
-            st.markdown(
-                """
-                - **Quality mode** changes the planning profile and cost assumptions.
-                - **Max generated video clips** limits the expensive Replicate video shots.
-                - **Max generated still/reference images** limits reusable characters, environments, documents, and still plates.
-                - **Actually call Replicate / render video** toggles spending/rendering. Leave it off for planning.
-                - **Resume and reuse existing outputs** prevents redoing files already saved under the same `run_id`.
-                """
-            )
+    _render_progress()
 
-        rough_image_cost = max_stills * 0.039
-        rough_video_cost = max_video_clips * 4 * 0.12
-        st.metric(
-            "Rough media estimate",
-            f"${rough_image_cost + rough_video_cost:.2f}",
-            help="Quick pre-planner estimate based on the caps above. The generated plan includes the real estimate.",
-        )
-        run_clicked = st.button("Start Production Run", type="primary", use_container_width=True)
+    if st.session_state.get("run_clicked"):
+        st.session_state.run_clicked = False
+        _run(options)
 
-    dashboard = st.container()
-    result_box = st.container()
-    _render_dashboard(dashboard)
+    _render_result()
 
-    if run_clicked:
-        st.session_state.events = []
-        st.session_state.worker_started_at = {}
-        st.session_state.worker_finished_at = {}
-        st.session_state.result = None
-        st.session_state.error = None
-        options = FernRunOptions(
-            topic=topic.strip(),
-            target_minutes=float(target_minutes),
-            max_budget_usd=float(max_budget),
-            run_id=run_id.strip() or _default_run_id(topic),
-            style_preset=style_preset.strip() or "Fern-style AI documentary",
-            quality_mode=str(quality_mode or "balanced"),
-            max_generated_video_clips=int(max_video_clips),
-            max_generated_stills=int(max_stills),
-            call_replicate=bool(call_replicate),
-            resume=bool(resume),
-        )
 
-        def on_progress(event: ProgressEvent) -> None:
-            _record_event(event)
-            _render_dashboard(dashboard)
+def _render_key_status() -> None:
+    replicate_ready = bool(os.getenv("REPLICATE_API_TOKEN"))
+    openai_ready = bool(os.getenv("OPENAI_API_KEY"))
+    if replicate_ready and openai_ready:
+        st.success("Ready: Seedance generation and caption transcription keys are loaded.")
+        return
+    if not replicate_ready:
+        st.error("Missing REPLICATE_API_TOKEN. Seedance video generation cannot run yet.")
+    if not openai_ready:
+        st.warning("Missing OPENAI_API_KEY. Video generation can run, but synced captions need this key.")
 
-        try:
-            with st.spinner("Production run in progress..."):
-                st.session_state.result = run_fern_pipeline(options, progress_callback=on_progress)
-        except Exception as exc:
-            st.session_state.error = f"{type(exc).__name__}: {exc}"
-            st.error(st.session_state.error)
-        _render_dashboard(dashboard)
 
-    _render_results(result_box)
+def _render_controls() -> SeedanceOptions:
+    st.subheader("1. Short Setup")
+    preset = st.selectbox(
+        "Scenario",
+        [
+            "Sinking car water tank",
+            "Custom",
+        ],
+        index=0,
+    )
+
+    topic = st.text_input(
+        "Folder name / run id",
+        value=st.session_state.get("run_id") or "seedance_sinking_car_v1",
+        help="One output folder is created under output/<run_id>.",
+    )
+
+    resolution = st.radio(
+        "Quality",
+        options=["480p", "720p", "1080p"],
+        index=1,
+        horizontal=True,
+        help="720p is the current price-quality target. 1080p is much more expensive.",
+    )
+    seed = st.number_input("Seed", min_value=1, max_value=999999, value=int(st.session_state.get("seed", 42420)), step=1)
+
+    st.subheader("2. Output")
+    add_captions = st.toggle("Add synced captions", value=True, help="Transcribe Seedance audio, clean obvious errors, and burn subtitles with FFmpeg.")
+    use_voice_reference = st.toggle(
+        "Keep voice consistent between clips",
+        value=True,
+        help="Pass clip 1 audio into clip 2 as a Seedance voice reference.",
+    )
+    resume = st.toggle("Reuse existing clips if present", value=True, help="Useful for caption-only rebuilds without paying for video again.")
+
+    estimate = estimate_seedance_cost(str(resolution))
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Clip 1", f"${estimate['clip_1_usd']:.2f}")
+    m2.metric("Clip 2", f"${estimate['clip_2_usd']:.2f}")
+    m3.metric("Total", f"${estimate['total_usd']:.2f}")
+
+    if preset == "Sinking car water tank":
+        script_part_1 = DEFAULT_SCRIPT_PART_1
+        script_part_2 = DEFAULT_SCRIPT_PART_2
+        clip_1_visual = DEFAULT_CLIP_1_VISUAL
+        clip_2_visual = DEFAULT_CLIP_2_VISUAL
+    else:
+        script_part_1 = st.session_state.get("script_part_1", DEFAULT_SCRIPT_PART_1)
+        script_part_2 = st.session_state.get("script_part_2", DEFAULT_SCRIPT_PART_2)
+        clip_1_visual = st.session_state.get("clip_1_visual", DEFAULT_CLIP_1_VISUAL)
+        clip_2_visual = st.session_state.get("clip_2_visual", DEFAULT_CLIP_2_VISUAL)
+
+    with st.expander("Advanced script and visual prompts", expanded=(preset == "Custom")):
+        st.caption("Keep each part around 15 seconds. Seedance speaks each part separately.")
+        script_part_1 = st.text_area("Narration clip 1", value=script_part_1, height=110)
+        script_part_2 = st.text_area("Narration clip 2", value=script_part_2, height=110)
+        clip_1_visual = st.text_area("Visual prompt clip 1", value=clip_1_visual, height=240)
+        clip_2_visual = st.text_area("Visual prompt clip 2", value=clip_2_visual, height=240)
+
+    st.session_state.run_id = topic
+    st.session_state.seed = int(seed)
+    st.session_state.script_part_1 = script_part_1
+    st.session_state.script_part_2 = script_part_2
+    st.session_state.clip_1_visual = clip_1_visual
+    st.session_state.clip_2_visual = clip_2_visual
+
+    if st.button("Generate Seedance Short", type="primary", use_container_width=True):
+        st.session_state.run_clicked = True
+        st.rerun()
+
+    return SeedanceOptions(
+        run_id=_safe_run_id(topic),
+        script_part_1=script_part_1.strip(),
+        script_part_2=script_part_2.strip(),
+        clip_1_visual=clip_1_visual.strip(),
+        clip_2_visual=clip_2_visual.strip(),
+        resolution=str(resolution),
+        seed=int(seed),
+        add_captions=bool(add_captions),
+        use_voice_reference=bool(use_voice_reference),
+        resume=bool(resume),
+    )
+
+
+def _render_preview_panel(options: SeedanceOptions) -> None:
+    st.subheader("What Will Happen")
+    st.markdown(
+        """
+        <div class="step">1. Generate clip 1 with Seedance native voice and sound.</div>
+        <div class="step">2. Extract the final frame and clip 1 voice reference.</div>
+        <div class="step">3. Generate clip 2 from that frame, matching the same voice.</div>
+        <div class="step">4. Stitch both clips, transcribe the native audio, and add clean captions.</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    with st.container(border=True):
+        st.markdown("**Narration**")
+        st.write(f"{options.script_part_1} {options.script_part_2}")
+
+    with st.container(border=True):
+        st.markdown("**Output folder**")
+        st.code(str(Path("output") / options.run_id), language="text")
+
+
+def _run(options: SeedanceOptions) -> None:
+    st.session_state.events = []
+    st.session_state.error = None
+    st.session_state.result = None
+    try:
+        with st.spinner("Generating Seedance short..."):
+            st.session_state.result = run_seedance_native_pipeline(options, progress_callback=_record_event)
+    except Exception as exc:
+        st.session_state.error = f"{type(exc).__name__}: {exc}"
+
+
+def _render_progress() -> None:
+    st.subheader("Progress")
+    latest = {worker: {"worker": worker, "status": "waiting", "message": "Waiting"} for worker in WORKERS}
+    for event in st.session_state.get("events", []):
+        latest[event["worker"]] = event
+
+    cols = st.columns(len(WORKERS))
+    for col, worker in zip(cols, WORKERS):
+        event = latest[worker]
+        status = event.get("status", "waiting")
+        col.markdown(f'<div class="status status-{status}">{STATUS_LABELS.get(status, status)}</div>', unsafe_allow_html=True)
+        col.caption(worker)
+        col.caption(event.get("message", ""))
+
+
+def _render_result() -> None:
+    if st.session_state.get("error"):
+        st.error(st.session_state.error)
+        return
+
+    result = st.session_state.get("result")
+    if not result:
+        st.info("Ready. Start with the preset, 720p, captions on, voice reference on.")
+        return
+
+    st.subheader("Result")
+    cols = st.columns(4)
+    cols[0].metric("Duration", f"{result['duration_seconds']}s")
+    cols[1].metric("Estimate", f"${result['estimate']['total_usd']:.2f}")
+    cols[2].metric("Resolution", result["resolution"])
+    cols[3].metric("Voice ref", "On" if result["voice_reference_used_for_clip2"] else "Off")
+
+    final_path = Path(result["final_path"])
+    if final_path.exists():
+        st.video(str(final_path))
+        st.success(f"Final: `{final_path}`")
+
+    tab_final, tab_review, tab_files = st.tabs(["Transcript", "Review Frames", "Files"])
+    with tab_final:
+        transcript = result.get("transcript_path")
+        if transcript and Path(transcript).exists():
+            st.write(Path(transcript).read_text(encoding="utf-8"))
+        else:
+            st.caption("No transcript file.")
+    with tab_review:
+        contact = result.get("contact_sheet")
+        if contact and Path(contact).exists():
+            st.image(str(contact), use_column_width=True)
+        for frame in result.get("review_frames", []):
+            if Path(frame).exists():
+                st.image(str(frame), use_column_width=True)
+    with tab_files:
+        st.json(result)
+
+
+def _record_event(event: ProgressEvent) -> None:
+    st.session_state.setdefault("events", []).append(event.to_dict())
 
 
 def _init_state() -> None:
     st.session_state.setdefault("events", [])
-    st.session_state.setdefault("worker_started_at", {})
-    st.session_state.setdefault("worker_finished_at", {})
     st.session_state.setdefault("result", None)
     st.session_state.setdefault("error", None)
+    st.session_state.setdefault("run_clicked", False)
+    st.session_state.setdefault("run_id", "seedance_sinking_car_v1")
+    st.session_state.setdefault("seed", 42420)
 
 
-def _record_event(event: ProgressEvent) -> None:
-    payload = event.to_dict()
-    payload["timestamp"] = time.time()
-    st.session_state.events.append(payload)
-    if event.status == "running" and event.worker not in st.session_state.worker_started_at:
-        st.session_state.worker_started_at[event.worker] = payload["timestamp"]
-    if event.status in {"done", "failed"}:
-        st.session_state.worker_finished_at[event.worker] = payload["timestamp"]
-
-
-def _render_dashboard(container: Any) -> None:
-    states = _worker_states()
-    with container:
-        st.subheader("Production Workers")
-        rows = [WORKERS[:4], WORKERS[4:]]
-        for row in rows:
-            cols = st.columns(4)
-            for col, worker in zip(cols, row):
-                with col:
-                    _worker_card(worker, states[worker])
-
-        recent_events = st.session_state.events[-10:]
-        with st.expander("Pipeline events", expanded=False):
-            if recent_events:
-                for event in reversed(recent_events):
-                    artifact = f" - `{event['artifact_path']}`" if event.get("artifact_path") else ""
-                    timestamp = time.strftime("%H:%M:%S", time.localtime(event["timestamp"]))
-                    st.caption(f"{timestamp} - {event['worker']} - {event['status']} - {event['message']}{artifact}")
-            else:
-                st.caption("No events yet.")
-
-
-def _worker_states() -> dict[str, dict[str, Any]]:
-    states = {
-        worker: {
-            "status": "waiting",
-            "message": "Waiting for the run to start",
-            "progress": None,
-            "artifact_path": None,
-            "preview_path": None,
-            "error": None,
-            "elapsed": 0.0,
-        }
-        for worker in WORKERS
-    }
-    for event in st.session_state.events:
-        worker = event["worker"]
-        if worker not in states:
-            continue
-        states[worker].update(
-            {
-                "status": event["status"],
-                "message": event["message"],
-                "progress": event.get("progress"),
-                "artifact_path": event.get("artifact_path"),
-                "preview_path": event.get("preview_path"),
-                "error": event.get("error"),
-            }
-        )
-    now = time.time()
-    for worker, state in states.items():
-        started = st.session_state.worker_started_at.get(worker)
-        finished = st.session_state.worker_finished_at.get(worker)
-        if started:
-            state["elapsed"] = (finished or now) - started
-    return states
-
-
-def _worker_card(worker: str, state: dict[str, Any]) -> None:
-    status = state["status"]
-    icon = STATUS_ICONS.get(status, "IDLE")
-    elapsed = _format_elapsed(float(state.get("elapsed") or 0))
-    artifact = state.get("artifact_path")
-    preview = state.get("preview_path")
-    message = state.get("message") or ""
-    status_class = f"status-{status}"
-
-    st.markdown(
-        f"""
-        <div class="worker-card {status_class}">
-          <div class="worker-head">
-            <span class="pulse">{icon}</span>
-            <span class="worker-title">{worker}</span>
-          </div>
-          <div class="worker-status">{status.upper()} - {elapsed}</div>
-          <div class="worker-message">{_escape_html(message)}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    progress = state.get("progress")
-    if progress is not None:
-        st.progress(float(progress))
-    if preview and _is_image_path(preview) and Path(preview).exists():
-        st.image(preview, use_container_width=True)
-    elif preview and _is_video_path(preview) and Path(preview).exists():
-        st.video(preview)
-    if artifact:
-        st.caption(f"Artifact: `{artifact}`")
-    if state.get("error"):
-        st.error(state["error"])
-
-
-def _render_results(container: Any) -> None:
-    result = st.session_state.result
-    if not result:
-        return
-
-    plan = result.get("plan", {})
-    budget = plan.get("budget_plan", {})
-    with container:
-        st.subheader("Run Output")
-        metric_cols = st.columns(5)
-        metric_cols[0].metric("Budget cap", f"${budget.get('max_budget_usd', 0):.2f}")
-        metric_cols[1].metric("Estimated total", f"${budget.get('estimated_total_usd', 0):.2f}")
-        metric_cols[2].metric("Images", f"${budget.get('image_usd', 0):.2f}")
-        metric_cols[3].metric("Video clips", f"${budget.get('video_usd', 0):.2f}")
-        metric_cols[4].metric("TTS", f"${budget.get('tts_usd', 0):.2f}")
-
-        final_path = result.get("final_path")
-        if final_path:
-            st.success(f"Final video: `{final_path}`")
-            if Path(final_path).exists():
-                st.video(final_path)
-        else:
-            st.info("Dry-run complete. No Replicate calls or final MP4 render were performed.")
-
-        tab_plan, tab_assets, tab_beats = st.tabs(["Plan JSON", "Assets", "Beat Timeline"])
-        with tab_plan:
-            st.caption(f"Saved to `{result.get('plan_path')}`")
-            st.json(plan)
-        with tab_assets:
-            _render_assets(plan.get("visual_assets", {}))
-        with tab_beats:
-            _render_beats(plan.get("beats", []))
-
-
-def _render_assets(visual_assets: dict[str, Any]) -> None:
-    for group in ("backgrounds", "characters", "props"):
-        st.markdown(f"**{group.title()}**")
-        assets = visual_assets.get(group, [])
-        if not assets:
-            st.caption("None planned.")
-            continue
-        for asset in assets:
-            st.write(f"`{asset.get('id')}` - {asset.get('description')}")
-            with st.expander("Prompt", expanded=False):
-                st.write(asset.get("image_prompt", ""))
-
-
-def _render_beats(beats: list[dict[str, Any]]) -> None:
-    for beat in beats:
-        start = float(beat.get("start_seconds", 0))
-        end = float(beat.get("end_seconds", 0))
-        st.markdown(f"**{beat.get('id')} - {beat.get('title')} - {start:.1f}s-{end:.1f}s - `{beat.get('visual_type')}`**")
-        st.write(beat.get("narration", ""))
-        overlays = [*beat.get("overlay_text", []), *beat.get("callouts", [])]
-        if overlays:
-            st.caption(f"Overlays/callouts: {', '.join(overlays)}")
-
-
-def _default_run_id(topic: str) -> str:
-    cleaned = "".join(char.lower() if char.isalnum() else "_" for char in topic.strip())[:36]
-    cleaned = "_".join(part for part in cleaned.split("_") if part)
-    return cleaned or "fern_doc_run"
-
-
-def _is_image_path(path: str) -> bool:
-    return Path(path).suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
-
-
-def _is_video_path(path: str) -> bool:
-    return Path(path).suffix.lower() in {".mp4", ".mov", ".webm"}
-
-
-def _format_elapsed(seconds: float) -> str:
-    if seconds <= 0:
-        return "0s"
-    minutes, sec = divmod(int(seconds), 60)
-    if minutes:
-        return f"{minutes}m {sec}s"
-    return f"{sec}s"
-
-
-def _escape_html(text: str) -> str:
-    return (
-        text.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
-        .replace("'", "&#x27;")
-    )
+def _safe_run_id(value: str) -> str:
+    words = re.findall(r"[A-Za-z0-9]+", value.lower())
+    return ("_".join(words) or "seedance_short")[:80]
 
 
 def _inject_css() -> None:
     st.markdown(
         """
         <style>
-        .stApp {
-            background:
-              linear-gradient(135deg, #151515 0%, #202020 45%, #171b19 100%);
-            color: #f5f1e8;
-        }
-        .topline {
-            color: #e2b84c;
-            font-size: 0.78rem;
+        .eyebrow {
+            color: #d61f35;
             font-weight: 800;
             letter-spacing: 0;
             text-transform: uppercase;
-            margin-bottom: 0.35rem;
+            font-size: 0.82rem;
+            margin-bottom: 0.2rem;
         }
-        h1, h2, h3 {
-            letter-spacing: 0;
+        .step {
+            border-left: 4px solid #d61f35;
+            padding: 0.55rem 0.8rem;
+            margin-bottom: 0.5rem;
+            background: rgba(127,127,127,0.08);
+            border-radius: 6px;
         }
-        section[data-testid="stSidebar"] {
-            background: #101010;
-            border-right: 1px solid #343434;
-        }
-        section[data-testid="stSidebar"] label,
-        section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
-        section[data-testid="stSidebar"] p,
-        section[data-testid="stSidebar"] span {
-            color: #e9e0c8;
-        }
-        section[data-testid="stSidebar"] small,
-        section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-            color: #b8ad93;
-        }
-        section[data-testid="stSidebar"] input,
-        section[data-testid="stSidebar"] textarea {
-            background: #181818 !important;
-            color: #fff7e6 !important;
-            border: 1px solid #4c4637 !important;
-            border-radius: 7px !important;
-            caret-color: #e2b84c !important;
-        }
-        section[data-testid="stSidebar"] input:focus,
-        section[data-testid="stSidebar"] textarea:focus {
-            border-color: #e2b84c !important;
-            box-shadow: 0 0 0 1px rgba(226,184,76,0.35) !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button {
-            background: #242424 !important;
-            color: #f5f1e8 !important;
-            border: 1px solid #4c4637 !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button:hover {
-            background: #343126 !important;
-            border-color: #e2b84c !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stSegmentedControl"] button {
-            background: #1a1a1a !important;
-            color: #f5f1e8 !important;
-            border: 1px solid #4c4637 !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stSegmentedControl"] button:hover {
-            background: #2b281f !important;
-            color: #fff7e6 !important;
-            border-color: #e2b84c !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stSegmentedControl"] button[aria-pressed="true"],
-        section[data-testid="stSidebar"] div[data-testid="stSegmentedControl"] button[aria-checked="true"] {
-            background: #e2b84c !important;
-            color: #101010 !important;
-            border-color: #e2b84c !important;
-            font-weight: 800 !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stSegmentedControl"] button[aria-pressed="true"] *,
-        section[data-testid="stSidebar"] div[data-testid="stSegmentedControl"] button[aria-checked="true"] * {
-            color: #101010 !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stCheckbox"] label {
-            background: transparent !important;
-            color: #e9e0c8 !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stCheckbox"] svg {
-            color: #101010 !important;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stMetric"] {
-            background: #191919;
-            border: 1px solid #3a3528;
+        .status {
             border-radius: 8px;
-            padding: 10px;
+            padding: 0.55rem 0.65rem;
+            text-align: center;
+            font-weight: 700;
+            border: 1px solid rgba(127,127,127,0.25);
         }
-        section[data-testid="stSidebar"] div[data-testid="stMetric"] [data-testid="stMetricValue"] {
-            color: #f4d06f;
-        }
-        section[data-testid="stSidebar"] div[data-testid="stExpander"] {
-            background: #171717;
-            border: 1px solid #3a3528;
-            border-radius: 8px;
-        }
-        section[data-testid="stSidebar"] .stButton button {
-            background: #e2b84c !important;
-            color: #101010 !important;
-            border: 1px solid #e2b84c !important;
-            border-radius: 7px !important;
-            font-weight: 800 !important;
-        }
-        section[data-testid="stSidebar"] .stButton button:hover {
-            background: #f0cc69 !important;
-            color: #101010 !important;
-            border-color: #f0cc69 !important;
-        }
-        .worker-card {
-            min-height: 154px;
-            padding: 14px 14px 12px;
-            border: 1px solid #3a3a3a;
-            border-radius: 8px;
-            background: #1d1d1d;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.24);
-        }
-        .worker-head {
-            display: flex;
-            gap: 9px;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .worker-title {
-            color: #fbf4e2;
-            font-size: 0.95rem;
-            font-weight: 800;
-            line-height: 1.18;
-        }
-        .worker-status {
-            color: #d7c9a0;
-            font-size: 0.76rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-        .worker-message {
-            color: #d8d3c7;
-            font-size: 0.84rem;
-            line-height: 1.35;
-        }
-        .status-running {
-            border-color: #e2b84c;
-            box-shadow: 0 0 0 1px rgba(226,184,76,0.18), 0 10px 24px rgba(0,0,0,0.24);
-        }
-        .status-done {
-            border-color: #4fb39a;
-        }
-        .status-failed {
-            border-color: #d75f5f;
-        }
-        .pulse {
-            color: #e2b84c;
-            font-weight: 900;
-            display: inline-block;
-            min-width: 34px;
-        }
-        .status-running .pulse {
-            animation: blink 1.1s infinite ease-in-out;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.35; }
-            50% { opacity: 1; }
-        }
+        .status-waiting { background: rgba(127,127,127,0.08); }
+        .status-running { background: rgba(214,31,53,0.16); }
+        .status-done { background: rgba(34,139,84,0.18); }
+        .status-failed { background: rgba(214,31,53,0.28); }
         div[data-testid="stMetric"] {
-            background: #191919;
-            border: 1px solid #333333;
+            border: 1px solid rgba(127,127,127,0.25);
             border-radius: 8px;
-            padding: 10px;
+            padding: 0.75rem;
         }
         </style>
         """,

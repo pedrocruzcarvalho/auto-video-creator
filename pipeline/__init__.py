@@ -1,1 +1,1 @@
-"""AI video generation pipeline."""
+"""Exit Scenario Shorts generation pipeline."""

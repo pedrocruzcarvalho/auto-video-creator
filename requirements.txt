@@ -1,8 +1,5 @@
-anthropic>=0.40.0
-langgraph>=0.2.60
 openai>=1.55.0
 replicate>=1.0.0
 python-dotenv>=1.0.1
-PyYAML>=6.0.2
 Pillow>=10.4.0
 streamlit>=1.36.0

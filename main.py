@@ -1,84 +1,67 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
-from pipeline.graph import run_video_graph
+sys.dont_write_bytecode = True
+
+from pipeline.seedance_native import (
+    DEFAULT_CLIP_1_VISUAL,
+    DEFAULT_CLIP_2_VISUAL,
+    DEFAULT_SCRIPT_PART_1,
+    DEFAULT_SCRIPT_PART_2,
+    SeedanceOptions,
+    run_seedance_native_pipeline,
+)
 
 
 def run(
     topic: str,
     *,
     run_id: str | None = None,
-    mock: bool = False,
-    duration: int | None = None,
-    scene_count: int | None = None,
-    seconds_per_box: int | None = None,
-    shots_min: int | None = None,
-    shots_max: int | None = None,
-    box_mode: bool = False,
-    doodle_mode: bool = False,
-    image_model: str | None = None,
+    resolution: str = "720p",
+    seed: int = 42420,
+    no_captions: bool = False,
+    no_voice_reference: bool = False,
+    fresh: bool = False,
 ) -> Path:
-    return run_video_graph(
-        topic,
-        run_id=run_id,
-        mock=mock,
-        duration_seconds=duration,
-        scene_count=scene_count,
-        seconds_per_box=seconds_per_box,
-        shots_min=shots_min,
-        shots_max=shots_max,
-        box_mode=box_mode,
-        doodle_mode=doodle_mode,
-        image_model=image_model,
+    result = run_seedance_native_pipeline(
+        SeedanceOptions(
+            run_id=run_id or _default_run_id(topic),
+            script_part_1=DEFAULT_SCRIPT_PART_1,
+            script_part_2=DEFAULT_SCRIPT_PART_2,
+            clip_1_visual=DEFAULT_CLIP_1_VISUAL,
+            clip_2_visual=DEFAULT_CLIP_2_VISUAL,
+            resolution=resolution,
+            seed=seed,
+            add_captions=not no_captions,
+            use_voice_reference=not no_voice_reference,
+            resume=not fresh,
+        )
     )
+    final_path = Path(result["final_path"])
+    print(final_path)
+    return final_path
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate a narrated video from a topic.")
-    parser.add_argument("topic", help="Video topic, for example: The Kessler Syndrome")
-    parser.add_argument("--run-id", help="Optional fixed run id for reproducible output folders")
-    parser.add_argument(
-        "--duration",
-        type=int,
-        help="Approximate final video duration in seconds. Used to size the narration script.",
-    )
-    parser.add_argument(
-        "--scene-count",
-        "--boxes",
-        dest="scene_count",
-        type=int,
-        help="Number of scenes/boxes to generate. For a paid smoke test, use 1.",
-    )
-    parser.add_argument(
-        "--seconds-per-box",
-        type=int,
-        help="Approximate narration duration per box in box mode. Default is 120 seconds.",
-    )
-    parser.add_argument(
-        "--box-mode",
-        action="store_true",
-        help="Prompt the script as a Paint Explainer-style grid/box video.",
-    )
-    parser.add_argument(
-        "--doodle-mode",
-        action="store_true",
-        help="Prompt the run as a polished hand-drawn doodle explainer.",
-    )
-    parser.add_argument(
-        "--image-model",
-        help="Optional Replicate image model override, for example recraft-ai/recraft-v3.",
-    )
-    parser.add_argument("--shots-min", type=int, help="Override minimum visual beats per scene/box. Defaults to auto.")
-    parser.add_argument("--shots-max", type=int, help="Override maximum visual beats per scene/box. Defaults to auto.")
-    parser.add_argument(
-        "--mock",
-        action="store_true",
-        help="Use placeholder script/images/audio instead of external AI APIs.",
-    )
+    parser = argparse.ArgumentParser(description="Generate a Seedance-native Exit Scenario Short.")
+    parser.add_argument("topic", nargs="?", default="Sinking car water tank", help="Used for the output folder name.")
+    parser.add_argument("--run-id", help="Optional fixed output folder under output/<run_id>.")
+    parser.add_argument("--resolution", choices=["480p", "720p", "1080p"], default="720p")
+    parser.add_argument("--seed", type=int, default=42420)
+    parser.add_argument("--no-captions", action="store_true", help="Skip Whisper transcription and burned subtitles.")
+    parser.add_argument("--no-voice-reference", action="store_true", help="Do not pass clip 1 audio into clip 2.")
+    parser.add_argument("--fresh", action="store_true", help="Regenerate clips even if files already exist.")
     return parser.parse_args(argv)
+
+
+def _default_run_id(topic: str) -> str:
+    words = re.findall(r"[A-Za-z0-9]+", topic.lower())
+    slug = "_".join(words[:8]) or "seedance_short"
+    return slug[:80]
 
 
 if __name__ == "__main__":
@@ -86,13 +69,9 @@ if __name__ == "__main__":
     run(
         args.topic,
         run_id=args.run_id,
-        mock=args.mock,
-        duration=args.duration,
-        scene_count=args.scene_count,
-        seconds_per_box=args.seconds_per_box,
-        shots_min=args.shots_min,
-        shots_max=args.shots_max,
-        box_mode=args.box_mode,
-        doodle_mode=args.doodle_mode,
-        image_model=args.image_model,
+        resolution=args.resolution,
+        seed=args.seed,
+        no_captions=args.no_captions,
+        no_voice_reference=args.no_voice_reference,
+        fresh=args.fresh,
     )

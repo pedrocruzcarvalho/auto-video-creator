@@ -1,69 +1,97 @@
-# AI YouTube Video Pipeline
+# Exit Scenario Shorts Studio
 
-Local-first LangGraph pipeline that turns a topic into a rendered MP4 under `output/<run_id>/final.mp4`.
+Local production tool for **Exit Scenario**:
+
+> One situation. One rule. One way out.
+
+The current workflow is Seedance-first:
+
+- generate two 15-second Seedance clips;
+- extract the last frame from clip 1;
+- start clip 2 from that exact frame;
+- pass clip 1 audio/video as a reference for clip 2;
+- stitch the native-audio clips;
+- transcribe the native audio;
+- burn clean synced subtitles with FFmpeg.
 
 ## Setup
 
-1. Install Python dependencies:
+Install Python dependencies:
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
 
-2. Install `ffmpeg` and make sure both `ffmpeg` and `ffprobe` are on PATH.
+Install `ffmpeg` and make sure `ffmpeg` and `ffprobe` are on PATH.
 
-3. Copy `.env.example` to `.env` and add the keys you want to use:
+Create `.env`:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-## Run
+Required keys:
 
-Fern-style Streamlit control room:
+- `REPLICATE_API_TOKEN` for Seedance video generation
+- `OPENAI_API_KEY` for transcription and captions
+
+## Run The App
 
 ```powershell
 streamlit run streamlit_app.py
 ```
 
-Start with "Actually call Replicate / render video" unchecked to generate only
-`output/<run_id>/fern_plan.json`, manifests, worker events, and budget estimates.
-When the checkbox is enabled, the Fern runner reuses the existing Replicate image,
-OpenAI TTS, motion-graphics, and final assembly pipeline. Replicate AI video clip
-generation is planned in `video_clip_manifest.json` and currently falls back to
-animated still plates during assembly.
+Recommended first run:
 
-Full AI pipeline:
+- Scenario: `Sinking car water tank`
+- Quality: `720p`
+- Add synced captions: on
+- Keep voice consistent between clips: on
+- Reuse existing clips: on
 
-```powershell
-python main.py "The Kessler Syndrome"
-```
+At 720p the planning estimate is about **$6 per 30-second Short**:
 
-Offline structure test with placeholder images, script, and silent audio:
+- clip 1: about `$2.70`
+- continuation clip 2: about `$3.30`
 
-```powershell
-python main.py "The Kessler Syndrome" --mock
-```
+Caption rebuilds do not require regenerating Seedance clips when reuse is on.
 
-One-minute paid smoke test with one generated box/image:
+## Run CLI
 
 ```powershell
-python main.py "Every Time We Went Close To World War 3: Kargil War" --box-mode --boxes 1 --seconds-per-box 120 --run-id ww3_kargil_test
+python main.py "Sinking car water tank" --run-id seedance_sinking_car_v1
 ```
 
-Each run writes:
+Useful options:
 
-- `output/<run_id>/assets/`
-- `output/<run_id>/script.json`
-- `output/<run_id>/images/`
-- `output/<run_id>/audio/`
-- `output/<run_id>/clips/`
-- `output/<run_id>/final.mp4`
+```powershell
+python main.py "Sinking car water tank" --resolution 480p
+python main.py "Sinking car water tank" --no-captions
+python main.py "Sinking car water tank" --fresh
+```
 
-## Notes
+Outputs are written to:
 
-- YouTube upload is intentionally not included.
-- LangGraph orchestrates the pipeline stages in `pipeline/graph.py`.
-- Claude now emits a reusable `visual_assets` plan with backgrounds, characters, and props. These assets are generated first, stored under `output/<run_id>/assets/`, and passed as reference images to Replicate models that support image inputs.
-- Generated images are cached by prompt hash under `.cache/images/`.
-- The mock mode still needs `ffmpeg` because it renders real audio/video files.
+```text
+output/<run_id>/
+```
+
+Important files:
+
+- `final.mp4` - captioned final Short
+- `final_seedance_native.mp4` - original stitched native-audio video
+- `native_transcript.txt` - cleaned transcript
+- `contact_sheet.jpg` - quick visual review
+- `run_report.md` / `run_report.json` - run details
+
+## Content Guides
+
+The creative direction lives in `docs/`:
+
+- `docs/channel_strategy.md`
+- `docs/shorts_format.md`
+- `docs/visual_style.md`
+- `docs/sound_design.md`
+- `docs/prompt_templates.md`
+- `docs/production_sop.md`
+- `docs/analytics_log.md`
