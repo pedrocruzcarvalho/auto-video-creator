@@ -36,6 +36,10 @@ Required keys:
 - `OPENAI_API_KEY` for transcription and captions
 - `ANTHROPIC_API_KEY` for optional Claude-powered idea generation
 
+Optional:
+
+- `ANTHROPIC_MODEL`, defaults to `claude-sonnet-4-6`
+
 ## Run The App
 
 ```powershell

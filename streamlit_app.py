@@ -565,7 +565,7 @@ def _claude_idea_batch(*, count: int) -> list[dict[str, str | int]]:
 
     client = Anthropic()
     response = client.messages.create(
-        model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
+        model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
         max_tokens=2600,
         temperature=0.9,
         system=(
