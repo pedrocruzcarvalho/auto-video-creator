@@ -357,7 +357,6 @@ def _render_controls() -> SeedanceOptions:
         clip_1_visual = st.text_area("Visual prompt clip 1", value=clip_1_visual, height=240, disabled=disabled)
         clip_2_visual = st.text_area("Visual prompt clip 2", value=clip_2_visual, height=240, disabled=disabled)
 
-    st.session_state.run_id = topic
     st.session_state.seed = int(seed)
     st.session_state.script_part_1 = script_part_1
     st.session_state.script_part_2 = script_part_2
